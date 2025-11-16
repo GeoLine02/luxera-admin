@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+button {
+  cursor: pointer;
+}
+
+.hover-transition {
+  @apply duration-200 transition-colors ease-in-out;
+}
+
+.container {
+  @apply w-full max-w-[1440px] mx-auto;
+}
+
 @theme {
   /* colors */
   --color-blue-50: "#ebf8ff";
