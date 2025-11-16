@@ -2,34 +2,32 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import { Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
 import { Input } from "@/components/ui/Input";
-import signupSchema from "./schema/signupSchema";
+import { Button } from "@/components/ui/Button";
+import signinSchema from "./schema/singinSchema";
 
-// Example: CVA button variants already supported by shadcn/ui
-// You can also create custom CVA components if needed
-export default function SignUp() {
+type FormData = z.infer<typeof signinSchema>;
+
+export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
-
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({ resolver: zodResolver(signupSchema) });
+  } = useForm<FormData>({ resolver: zodResolver(signinSchema) });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: FormData) => {
     console.log(data);
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex min-h-screen justify-center items-center">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -39,70 +37,63 @@ export default function SignUp() {
         <Card className="shadow-xl border rounded-2xl p-4">
           <Card.Header>
             <Card.Title className="text-center text-2xl font-semibold">
-              Create an Account
+              Sign In
             </Card.Title>
           </Card.Header>
           <Card.Content>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-              {/* Full Name */}
               <div className="space-y-1">
-                <Label htmlFor="fullName">Full Name</Label>
+                <Label htmlFor="email" className="text-blue-100">
+                  Email
+                </Label>
                 <Input
-                  type="text"
-                  placeholder="John Doe"
-                  {...register("fullName")}
-                />
-                {errors.fullName && (
-                  <p className="text-sm text-red-600">
-                    {errors.fullName.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Email */}
-              <div className="space-y-1">
-                <Label>Email</Label>
-                <Input
+                  id="email"
                   type="email"
                   placeholder="you@example.com"
                   {...register("email")}
+                  variant="default"
+                  className="bg-blue-800 placeholder-blue-300"
                 />
                 {errors.email && (
-                  <p className="text-sm text-red-600">{errors.email.message}</p>
+                  <p className="text-sm text-red-500">{errors.email.message}</p>
                 )}
               </div>
 
-              {/* Password */}
               <div className="space-y-1">
-                <Label>Password</Label>
+                <Label htmlFor="password" className="text-blue-100">
+                  Password
+                </Label>
                 <div className="relative">
                   <Input
+                    id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     {...register("password")}
+                    variant="default"
+                    className="bg-blue-800 placeholder-blue-300"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-200 hover:text-white"
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="text-sm text-red-600">
+                  <p className="text-sm text-red-500">
                     {errors.password.message}
                   </p>
                 )}
               </div>
 
-              {/* Button using CVA */}
               <Button
+                type="submit"
                 variant="default"
                 size="lg"
                 className="w-full py-2 rounded-xl"
               >
-                Sign Up
+                Sign In
               </Button>
             </form>
           </Card.Content>
