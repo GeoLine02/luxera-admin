@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import { Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/Card";
@@ -11,21 +10,41 @@ import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
 import { Input } from "@/components/ui/Input";
 import signupSchema from "./schema/signupSchema";
+import { registerUserService } from "./services/register";
+import { UserRegisterType } from "@/types/user";
+import { useRouter } from "next/navigation";
+import { ClipLoader } from "react-spinners";
 
-// Example: CVA button variants already supported by shadcn/ui
-// You can also create custom CVA components if needed
 export default function SignUp() {
-  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [serverError, setServerError] = useState<null | string>(null);
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm({ resolver: zodResolver(signupSchema) });
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<UserRegisterType>({ resolver: zodResolver(signupSchema) });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onSubmit = (data: any) => {
-    console.log(data);
+  const onSubmit = async (data: UserRegisterType) => {
+    console.log("enters");
+    try {
+      const res = await registerUserService(data);
+
+      if (!res.ok) {
+        if (res.message) setServerError(res.message);
+        return;
+      }
+
+      reset();
+
+      if (res.data) {
+        router.push("/");
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -96,13 +115,18 @@ export default function SignUp() {
                 )}
               </div>
 
-              {/* Button using CVA */}
+              {serverError && (
+                <p className="text-sm text-red-500">{serverError}</p>
+              )}
+
               <Button
+                disabled={isSubmitting}
+                type="submit"
                 variant="default"
                 size="lg"
                 className="w-full py-2 rounded-xl"
               >
-                Sign Up
+                {isSubmitting ? <ClipLoader /> : "Sign Up"}
               </Button>
             </form>
           </Card.Content>

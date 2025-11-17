@@ -29,6 +29,7 @@ export interface ButtonProps
   extends React.HTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonStyles> {
   type?: "submit" | "button" | "reset";
+  disabled?: boolean;
 }
 
 export function Button({
@@ -36,12 +37,14 @@ export function Button({
   variant,
   size,
   type = "button",
+  disabled,
   children,
   ...props
 }: ButtonProps) {
   return (
     <button
       type={type}
+      disabled={disabled}
       className={cn(buttonStyles({ variant, size }), className)}
       {...props}
     >
