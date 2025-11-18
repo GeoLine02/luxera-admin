@@ -1,5 +1,4 @@
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 
 async function refreshAccessToken(refreshToken: string) {
@@ -23,15 +22,26 @@ async function refreshAccessToken(refreshToken: string) {
   }
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const cookieStore = await cookies();
 
   const accessToken = cookieStore.get("accessToken")?.value;
   const refreshToken = cookieStore.get("refreshToken")?.value;
+  const pathname = request.nextUrl.pathname;
+  const authRoutes = ["/signin", "/register"];
+  const protectedRotues = ["/"];
 
-  //   if (accessToken && refreshToken) {
-  //     return NextResponse.redirect(new URL("/", request.url));
-  //   }
+  if (accessToken && refreshToken) {
+    if (authRoutes.some((route) => pathname === route)) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
+  if (!accessToken && !refreshToken) {
+    if (protectedRotues.some((route) => pathname === route)) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
 
   if (!accessToken && refreshToken) {
     const res = await refreshAccessToken(refreshToken);
