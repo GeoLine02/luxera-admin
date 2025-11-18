@@ -28,7 +28,6 @@ export default function SignUp() {
   } = useForm<UserRegisterType>({ resolver: zodResolver(signupSchema) });
 
   const onSubmit = async (data: UserRegisterType) => {
-    console.log("enters");
     try {
       const res = await registerUserService(data);
 
@@ -126,7 +125,7 @@ export default function SignUp() {
                 size="lg"
                 className="w-full py-2 rounded-xl"
               >
-                {isSubmitting ? <ClipLoader /> : "Sign Up"}
+                {isSubmitting ? <ClipLoader color="white" /> : "Sign Up"}
               </Button>
             </form>
           </Card.Content>
