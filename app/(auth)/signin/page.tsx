@@ -11,6 +11,10 @@ import { Label } from "@/components/ui/Label";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import signinSchema from "./schema/singinSchema";
+import { loginUserService } from "./services/login";
+import { UserLoginType } from "@/types/user";
+import { useRouter } from "next/navigation";
+import { ClipLoader } from "react-spinners";
 
 type FormData = z.infer<typeof signinSchema>;
 
@@ -19,11 +23,27 @@ export default function SignIn() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    reset,
+    formState: { errors, isSubmitting },
   } = useForm<FormData>({ resolver: zodResolver(signinSchema) });
+  const router = useRouter();
 
-  const onSubmit = (data: FormData) => {
-    console.log(data);
+  const onSubmit = async (data: UserLoginType) => {
+    try {
+      const res = await loginUserService(data);
+
+      if (!res.ok) {
+        return;
+      }
+
+      reset();
+
+      if (res.data) {
+        router.push("/");
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -89,11 +109,12 @@ export default function SignIn() {
 
               <Button
                 type="submit"
+                disabled={isSubmitting}
                 variant="default"
                 size="lg"
                 className="w-full py-2 rounded-xl"
               >
-                Sign In
+                {isSubmitting ? <ClipLoader color="white" /> : "Sign In"}
               </Button>
             </form>
           </Card.Content>
