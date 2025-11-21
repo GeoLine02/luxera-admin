@@ -1,14 +1,16 @@
 export interface CategoryType {
   id: number;
   categoryName: string;
-  categoryImage: string | File | null;
+  categoryImage: string;
+  categoryImageFile?: File | null;
 }
 
 export interface SubCategoryType {
   id: number;
   subCategoryName: string;
-  subCategoryImage: string | File | null;
+  subCategoryImage: string;
   categoryId: number;
+  subCategoryImageFile: File | null;
 }
 
 export interface CategoryWithSubcategories extends CategoryType {

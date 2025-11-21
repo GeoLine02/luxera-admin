@@ -58,6 +58,7 @@ export const CategoriesList = ({ categories }: CategoriesListProps) => {
       categoryName: "",
       id: Infinity,
       subCategories: [],
+      categoryImageFile: null,
     });
 
   const handleToggleEditModal = (categoryId?: number) => {

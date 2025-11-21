@@ -7,6 +7,7 @@ import { ChangeEvent, Dispatch, FormEvent, SetStateAction } from "react";
 import { SubCategoriesList } from "./SubCategoriesList";
 import AddSubcategory from "./AddSubcategory";
 import { Button } from "@/components/ui/Button";
+import Upload from "@/components/ui/Upload";
 
 interface CategoryFormProps {
   actionName: "create" | "edit";
@@ -27,9 +28,22 @@ const CategoryForm = ({
 
   const onCategoryInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSelectedCategoryData((prev) => {
-      console.log("prev", prev);
       return { ...prev, categoryName: e.target.value };
     });
+  };
+
+  const onCategoryFileChange = (files: File[]) => {
+    setSelectedCategoryData((prev) => ({
+      ...prev,
+      categoryImageFile: files[0] ?? null,
+    }));
+  };
+
+  const onCategoryImageUrlRemove = () => {
+    setSelectedCategoryData((prev) => ({
+      ...prev,
+      categoryImage: "",
+    }));
   };
 
   return (
@@ -47,6 +61,18 @@ const CategoryForm = ({
           onChange={onCategoryInputChange}
         />
       </div>
+
+      <Upload
+        fileUrls={selectedCategoryData.categoryImage} // url or []
+        files={
+          selectedCategoryData.categoryImageFile
+            ? [selectedCategoryData.categoryImageFile]
+            : []
+        }
+        multiSelect={false}
+        onChange={onCategoryFileChange}
+        onRemoveUrl={onCategoryImageUrlRemove}
+      />
 
       {/* SUBCATEGORIES */}
       {selectedCategoryData?.subCategories && (
