@@ -1,10 +1,12 @@
+import api from "@/utils/axios";
+
 export const fetchCategories = async () => {
   try {
-    const res = await fetch("http://localhost:3000/api/categories");
+    const res = await api.get("/api/categories");
 
-    if (res.ok) {
-      const data = await res.json();
-      return data;
+    if (res.status === 200) {
+      const data = res;
+      return data.data;
     }
   } catch (error) {
     console.log(error);

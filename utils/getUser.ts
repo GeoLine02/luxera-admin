@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import api, { apiKey } from "./axios";
 
 export const getUser = async () => {
   try {
@@ -6,8 +7,8 @@ export const getUser = async () => {
     const accessToken = cookie.get("accessToken")?.value;
     // const refreshToken = cookie.get("refreshToken")?.value;
 
-    const res = await fetch("http://localhost:3000/api/user", {
-      cache: "no-store", // Important: don't cache user data
+    const res = await api.get(`/api/user`, {
+      // cache: "no-store", // Important: don't cache user data
       headers: {
         "Content-Type": "application/json",
         authorization: `Bearer ${accessToken}`,
@@ -31,7 +32,8 @@ export const getUser = async () => {
     //     cookie.set("accessToken", data.accessToken);
     //   }
     // }
-    const data = await res.json();
+    const data = res.data;
+    console.log(data)
     return data;
   } catch (error) {
     console.error("getUser error:", error);

@@ -101,7 +101,8 @@ export const CategoriesList = ({ categories }: CategoriesListProps) => {
 
   return (
     <div className="flex flex-wrap gap-2">
-      {categories.map((category) => (
+      
+      {categories !== undefined && categories.map((category) => (
         <CategoryCard
           key={category?.id}
           id={category?.id}
