@@ -11,7 +11,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 interface UserProviderType {
   children: React.ReactNode;
-  userData: UserType;
+  userData: UserType | any;
 }
 
 export const UserProvider = ({ children, userData }: UserProviderType) => {

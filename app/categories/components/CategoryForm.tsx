@@ -3,11 +3,11 @@
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { CategoryWithSubcategories } from "@/types/categories";
-import { ChangeEvent, Dispatch, FormEvent, SetStateAction } from "react";
+import React, { ChangeEvent, Dispatch, FormEvent, SetStateAction } from "react";
 import { SubCategoriesList } from "./SubCategoriesList";
 import AddSubcategory from "./AddSubcategory";
 import { Button } from "@/components/ui/Button";
-import Upload from "@/components/ui/Upload";
+import { InputImage } from "@/components/ui/ImageDrop";
 
 interface CategoryFormProps {
   actionName: "create" | "edit";
@@ -26,54 +26,82 @@ const CategoryForm = ({
 }: CategoryFormProps) => {
   const isEdit = actionName === "edit";
 
+  const [imagePreviewUrl, setImagePreviewUrl] = React.useState<string | null>(
+    (selectedCategoryData?.categoryImage as string) || null
+  );
+
   const onCategoryInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSelectedCategoryData((prev) => {
       return { ...prev, categoryName: e.target.value };
     });
   };
 
-  const onCategoryFileChange = (files: File[]) => {
-    setSelectedCategoryData((prev) => ({
-      ...prev,
-      categoryImageFile: files[0] ?? null,
-    }));
-  };
+  const onCategoryInputImageChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = e.target.files;
+    const selectedFile = files && files.length > 0 ? files[0] : null;
 
-  const onCategoryImageUrlRemove = () => {
-    setSelectedCategoryData((prev) => ({
+    setSelectedCategoryData((prev: any) => ({
       ...prev,
-      categoryImage: "",
+      categoryImage: selectedFile,
     }));
+
+    if (selectedFile) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreviewUrl(reader.result as string);
+      };
+
+      reader.readAsDataURL(selectedFile);
+    } else {
+      setImagePreviewUrl(null);
+    }
   };
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="mt-4">
-        <Label variant="default" size="sm" className="text-white/80 mb-1">
-          Category Name
-        </Label>
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3">
+              <Label variant="default" size="sm" className="text-white/80 mb-1">
+                Category image
+              </Label>
 
-        <Input
-          variant="default"
-          placeholder="Enter Category Name"
-          name="categoryName"
-          value={selectedCategoryData?.categoryName}
-          onChange={onCategoryInputChange}
-        />
+              <div className="w-full h-40 border-dashed border-2 border-gray-500 rounded-xl flex items-center justify-center overflow-hidden">
+                {imagePreviewUrl ? (
+                  <img
+                    src={imagePreviewUrl}
+                    alt="Category Preview"
+                    className="object-contain w-full h-full"
+                  />
+                ) : (
+                  <span className="text-gray-400">No Image Selected</span>
+                )}
+              </div>
+
+              <InputImage
+                variant="default"
+                name="categoryImage"
+                onChange={onCategoryInputImageChange}
+              />
+            </div>
+          </div>
+          <div className="flex flex-col gap-3">
+            <Label variant="default" size="sm" className="text-white/80 mb-1">
+              Category Name
+            </Label>
+            <Input
+              variant="default"
+              placeholder="Enter Category Name"
+              name="categoryName"
+              value={selectedCategoryData?.categoryName || ""}
+              onChange={onCategoryInputChange}
+            />
+          </div>
+        </div>
       </div>
-
-      <Upload
-        fileUrls={selectedCategoryData.categoryImage} // url or []
-        files={
-          selectedCategoryData.categoryImageFile
-            ? [selectedCategoryData.categoryImageFile]
-            : []
-        }
-        multiSelect={false}
-        onChange={onCategoryFileChange}
-        onRemoveUrl={onCategoryImageUrlRemove}
-      />
-
       {/* SUBCATEGORIES */}
       {selectedCategoryData?.subCategories && (
         <SubCategoriesList
