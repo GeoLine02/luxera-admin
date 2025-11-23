@@ -8,6 +8,7 @@ import { SubCategoriesList } from "./SubCategoriesList";
 import AddSubcategory from "./AddSubcategory";
 import { Button } from "@/components/ui/Button";
 import { InputImage } from "@/components/ui/ImageDrop";
+import Image from "next/image";
 
 interface CategoryFormProps {
   actionName: "create" | "edit";
@@ -72,10 +73,12 @@ const CategoryForm = ({
 
               <div className="w-full h-40 border-dashed border-2 border-gray-500 rounded-xl flex items-center justify-center overflow-hidden">
                 {imagePreviewUrl ? (
-                  <img
+                  <Image
                     src={imagePreviewUrl}
                     alt="Category Preview"
                     className="object-contain w-full h-full"
+                    width={0}
+                    height={0}
                   />
                 ) : (
                   <span className="text-gray-400">No Image Selected</span>
@@ -103,6 +106,7 @@ const CategoryForm = ({
           </div>
         </div>
       </div>
+      
       {/* SUBCATEGORIES */}
       {selectedCategoryData?.subCategories && (
         <SubCategoriesList

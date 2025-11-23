@@ -16,6 +16,16 @@ interface CategoryCardProps {
   handleToggleEditModal: (categoryId: number) => void;
 }
 
+export function generateUniqueNumericId(): number {
+  const timestamp = Date.now(); 
+
+  const randomFactor = Math.floor(Math.random() * 100); 
+  const numericString = `${timestamp}${randomFactor.toString().padStart(2, '0')}`;
+  
+  return Number(numericString);
+}
+ 
+
 const CategoryCard = ({
   id,
   categoryName,
@@ -56,7 +66,7 @@ export const CategoriesList = ({ categories }: CategoriesListProps) => {
     useState<CategoryWithSubcategories>({
       categoryImage: "",
       categoryName: "",
-      id: Infinity,
+      id: generateUniqueNumericId(),
       subCategories: [],
     });
 
@@ -67,11 +77,13 @@ export const CategoriesList = ({ categories }: CategoriesListProps) => {
       setSelectedCategoryData({
         categoryImage: "",
         categoryName: "",
-        id: Infinity,
+        id: generateUniqueNumericId(),
         subCategories: [],
       });
   };
+  
   console.log("selectedCategoryData", selectedCategoryData);
+
   const handleToggleDeleteModal = (categoryId?: number) => {
     setIsDeleteModalOpen(!isDeleteModalOpen);
     setSelectedCategoryId(categoryId ?? null);
@@ -83,7 +95,7 @@ export const CategoriesList = ({ categories }: CategoriesListProps) => {
       setSelectedCategoryData({
         categoryImage: "",
         categoryName: "",
-        id: Infinity,
+        id: generateUniqueNumericId(),
         subCategories: [],
       });
   };
@@ -91,6 +103,7 @@ export const CategoriesList = ({ categories }: CategoriesListProps) => {
   const handleEditCategory = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   };
+  
   const handleDeleteCategory = () => {};
 
   const handleSelectCategoryData = (
@@ -101,17 +114,17 @@ export const CategoriesList = ({ categories }: CategoriesListProps) => {
 
   return (
     <div className="flex flex-wrap gap-2">
-      
-      {categories !== undefined && categories.map((category) => (
-        <CategoryCard
-          key={category?.id}
-          id={category?.id}
-          categoryImage=""
-          categoryName={category.categoryName}
-          handleToggleDeleteModal={handleToggleEditModal}
-          handleToggleEditModal={handleToggleEditModal}
-        />
-      ))}
+      {categories?.map &&
+        categories.map((category) => (
+          <CategoryCard
+            key={category?.id}
+            id={category?.id}
+            categoryImage=""
+            categoryName={category.categoryName}
+            handleToggleDeleteModal={handleToggleEditModal}
+            handleToggleEditModal={handleToggleEditModal}
+          />
+        ))}
       <AddCategory handleToggleCreateModal={handleToggleCreateModal} />
       {isEditModalOpen && (
         <CategoryEditModal

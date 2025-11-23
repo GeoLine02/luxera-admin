@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/Label";
 import { ChangeEvent, useState } from "react";
 import { CategoryWithSubcategories, SubCategoryType } from "@/types/categories";
 import { InputImage } from "@/components/ui/ImageDrop";
+import { generateUniqueNumericId } from "./CategoriesList";
 
 interface AddSubcategoryProps {
   selectedCategoryData: { subCategories: SubCategoryType[]; id: number } | null;
@@ -41,8 +42,7 @@ const AddSubcategory = ({
     if (exists) return;
 
     const newSubcategory: SubCategoryType = {
-      id:
-        Math.max(0, ...selectedCategoryData.subCategories.map((s) => s.id)) + 1,
+      id: generateUniqueNumericId(),
       subCategoryName: inputValue.trim(),
       subCategoryImage: localImageFile,
       categoryId: selectedCategoryData.id,
@@ -61,6 +61,8 @@ const AddSubcategory = ({
     setLocalImageFile(null);
   };
  
+
+
   return (
     <div className="flex items-end gap-2 w-full">
       <div className="w-1/2 flex-col">

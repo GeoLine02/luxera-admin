@@ -4,6 +4,7 @@ import { UserProvider } from "@/context/UserProvider";
 import { getUser } from "@/utils/getUser";
 import SideMenu from "@/components/shared/SideMenu";
 import { Poppins } from "next/font/google";
+import ReduxProvider from "./providers/ReduxProvider";
 
 export const metadata: Metadata = {
   title: "Luxera Admin",
@@ -26,13 +27,17 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={`${poppins.className} bg-dark-gray min-h-screen`}>
-        <UserProvider userData={userData?.user}>
-          <div className="w-full flex h-full">
-            <SideMenu />
-            <main className="w-full">{children}</main>
-          </div>
-        </UserProvider>
+        <ReduxProvider>
+          <UserProvider userData={userData?.user}>
+            <div className="w-full flex h-full">
+              <SideMenu />
+              <main className="w-full">{children}</main>
+            </div>
+          </UserProvider>
+        </ReduxProvider>
       </body>
     </html>
   );
 }
+
+
