@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 async function refreshAccessToken(refreshToken: string) {
   try {
-    const res = await fetch("http://localhost:3000/api/auth/refresh", {
+    const res = await fetch(`${process.env.API_BASE_URL}/auth/refresh`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

@@ -1,38 +1,26 @@
 import { cookies } from "next/headers";
-// import api from "./axios";
+import api from "./axios";
 
 export const getUser = async () => {
   try {
     const cookie = await cookies();
     const accessToken = cookie.get("accessToken")?.value;
 
-    const res = await fetch("https://luxera-admin-api.onrender.com/", {
+    // const refreshToken = cookie.get("refreshToken")?.value;
+
+    const res = await api.get(`${process.env.API_BASE_URL}/user`, {
       headers: {
-        "Content-Type": "appliction/json",
+        "Content-Type": "application/json",
         authorization: `Bearer ${accessToken}`,
       },
     });
-
-    if (res.ok) {
-      const data = await res.json();
-      console.log(data);
-      return data;
+    const data = res.data;
+    console.log(data);
+    return data;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    if (error.status === 401) {
+      return null;
     }
-
-    // const refreshToken = cookie.get("refreshToken")?.value;
-
-    // const res = await api.get(`/api/user`, {
-    //   // cache: "no-store", // Important: don't cache user data
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     authorization: `Bearer ${accessToken}`,
-    //   },
-    // });
-    // const data = res.data;
-    // console.log(data);
-    // return data;
-  } catch (error) {
-    console.error("getUser error:", error);
-    return null;
   }
 };
