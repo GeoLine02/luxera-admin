@@ -11,60 +11,67 @@ async function refreshAccessToken(refreshToken: string) {
       },
     });
 
-    if (res.status === 401) {
-      return null;
-    }
-
-    const data = await res.json();
-    return data;
+    if (!res.ok) return null;
+    return res.json();
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    return null;
   }
 }
 
 export async function proxy(request: NextRequest) {
   const cookieStore = await cookies();
-
   const accessToken = cookieStore.get("accessToken")?.value;
   const refreshToken = cookieStore.get("refreshToken")?.value;
   const pathname = request.nextUrl.pathname;
+
   const authRoutes = ["/signin", "/register"];
-  const protectedRotues = ["/"];
+  const protectedRoutes = ["/", "/categories"];
 
+  // ============================================================
+  // 1️⃣ USER ALREADY LOGGED IN → BLOCK AUTH ROUTES
+  // ============================================================
   if (accessToken && refreshToken) {
-    if (authRoutes.some((route) => pathname === route)) {
+    if (authRoutes.includes(pathname)) {
       return NextResponse.redirect(new URL("/", request.url));
     }
+    return NextResponse.next();
   }
 
+  // ============================================================
+  // 2️⃣ NO TOKENS → REDIRECT TO SIGNIN
+  // ============================================================
   if (!accessToken && !refreshToken) {
-    if (protectedRotues.some((route) => pathname === route)) {
-      return NextResponse.redirect(new URL("/", request.url));
+    if (protectedRoutes.includes(pathname)) {
+      return NextResponse.redirect(new URL("/signin", request.url));
     }
+    return NextResponse.next();
   }
 
+  // ============================================================
+  // 3️⃣ REFRESH TOKEN EXISTS BUT NO ACCESS TOKEN → REFRESH IT
+  // ============================================================
   if (!accessToken && refreshToken) {
     const res = await refreshAccessToken(refreshToken);
 
-    if (res.accessToken) {
+    if (res?.accessToken) {
       const response = NextResponse.next();
-
-      response.cookies.set({
-        name: "accessToken",
-        value: res.accessToken,
+      response.cookies.set("accessToken", res.accessToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
         path: "/",
+        secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
-        // maxAge: 15 * 60, // optional: set expiry
       });
 
       return response;
-    } else {
-      const response = NextResponse.redirect(new URL("/login", request.url));
-      response.cookies.delete("refreshToken");
-      response.cookies.delete("accessToken");
-      return response;
     }
+
+    // Refresh failed → force logout
+    const response = NextResponse.redirect(new URL("/signin", request.url));
+    response.cookies.delete("accessToken");
+    response.cookies.delete("refreshToken");
+    return response;
   }
+
+  return NextResponse.next();
 }
