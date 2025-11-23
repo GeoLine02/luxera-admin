@@ -33,7 +33,6 @@ const CategoryForm = ({
 
   const onCategoryInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSelectedCategoryData((prev) => {
-      console.log("prev", prev);
       return { ...prev, categoryName: e.target.value };
     });
   };
@@ -114,7 +113,7 @@ const CategoryForm = ({
           subCategories={selectedCategoryData.subCategories}
         />
       )}
-    
+
       <AddSubcategory
         selectedCategoryData={selectedCategoryData}
         setSelectedCategoryData={setSelectedCategoryData}

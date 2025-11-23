@@ -2,7 +2,7 @@ import api from "@/utils/axios";
 
 export const fetchCategories = async () => {
   try {
-    const res = await api.get("/api/categories");
+    const res = await api.get(`${process.env.API_BASE_URL}/categories`);
 
     if (res.status === 200) {
       const data = res;

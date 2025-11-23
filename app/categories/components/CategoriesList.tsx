@@ -68,6 +68,7 @@ export const CategoriesList = ({ categories }: CategoriesListProps) => {
       categoryName: "",
       id: generateUniqueNumericId(),
       subCategories: [],
+      categoryImageFile: null,
     });
 
   const handleToggleEditModal = (categoryId?: number) => {

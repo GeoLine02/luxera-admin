@@ -1,9 +1,13 @@
 import axios from "axios";
 
-export const apiKey = process.env.NEXT_PUBLIC_API_KEY;
+const isServer = typeof window === "undefined";
 
 const api = axios.create({
-  baseURL: apiKey,
+  baseURL: isServer
+    ? process.env.NODE_ENV === "production"
+      ? process.env.API_URL_SERVER
+      : "http://localhost:4001"
+    : "/api",
   withCredentials: true,
 });
 
