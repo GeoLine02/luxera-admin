@@ -3,6 +3,7 @@ import { fetchCategories } from "./services/categories";
 
 const CategoriesPage = async () => {
   const categoriesData = await fetchCategories();
+  console.log("data " + categoriesData)
 
   return (
     <div>

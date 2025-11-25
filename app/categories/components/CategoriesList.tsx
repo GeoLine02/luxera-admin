@@ -7,13 +7,16 @@ import CategoryEditModal from "./CategoryEditModal";
 import CategoryDeleteModal from "./CategoryDeleteModal";
 import AddCategory from "./AddCategory";
 import CategoryCreateModal from "./CategoryCreateModal";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/app/store/store";
+import { OpenCreateModal, OpenDeleteModal, OpenEditModal } from "@/app/store/features/IsOpenBoolean";
 
 interface CategoryCardProps {
-  id: number;
+  id: number | undefined;
   categoryName: string;
   categoryImage: string;
-  handleToggleDeleteModal: (categoryId: number) => void;
-  handleToggleEditModal: (categoryId: number) => void;
+  handleToggleDeleteModal: (categoryId: number | undefined) => void;
+  handleToggleEditModal: (categoryId: number | undefined) => void;
 }
 
 export function generateUniqueNumericId(): number {
@@ -55,30 +58,31 @@ interface CategoriesListProps {
 }
 
 export const CategoriesList = ({ categories }: CategoriesListProps) => {
-  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+
+  const Dispatch = useDispatch<AppDispatch>();
+  const {isCreateModalOpen, isDeleteModalOpen, isEditModalOpen} = useSelector((state: RootState) => state.IsOpenModals)
 
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
     null
   );
+
   const [selectedCategoryData, setSelectedCategoryData] =
     useState<CategoryWithSubcategories>({
       categoryImage: "",
       categoryName: "",
       id: generateUniqueNumericId(),
       subCategories: [],
-      categoryImageFile: null,
+      // categoryImageFile: null,
     });
 
   const handleToggleEditModal = (categoryId?: number) => {
-    setIsEditModalOpen(!isEditModalOpen);
+    Dispatch(OpenEditModal());
     setSelectedCategoryId(categoryId ?? null);
     if (isEditModalOpen)
       setSelectedCategoryData({
         categoryImage: "",
         categoryName: "",
-        id: generateUniqueNumericId(),
+        id: categoryId,
         subCategories: [],
       });
   };
@@ -86,17 +90,17 @@ export const CategoriesList = ({ categories }: CategoriesListProps) => {
   console.log("selectedCategoryData", selectedCategoryData);
 
   const handleToggleDeleteModal = (categoryId?: number) => {
-    setIsDeleteModalOpen(!isDeleteModalOpen);
+    Dispatch(OpenDeleteModal());
     setSelectedCategoryId(categoryId ?? null);
   };
 
   const handleToggleCreateModal = () => {
-    setIsCreateModalOpen(!isCreateModalOpen);
+    Dispatch(OpenCreateModal());
     if (isCreateModalOpen)
       setSelectedCategoryData({
         categoryImage: "",
         categoryName: "",
-        id: generateUniqueNumericId(),
+        id: 0,
         subCategories: [],
       });
   };

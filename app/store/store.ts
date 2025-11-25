@@ -1,10 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { DataSliceReducer } from "./features/CategoryDataState";
+import { IsOpenModals } from "./features/IsOpenBoolean";
 
 export function makeStore() {
   return configureStore({
     reducer: {
-      categoryData: DataSliceReducer,  
+      categoryData: DataSliceReducer,
+      IsOpenModals: IsOpenModals,
     },
   });
 }

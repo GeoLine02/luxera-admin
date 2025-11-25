@@ -9,7 +9,7 @@ import { InputImage } from "@/components/ui/ImageDrop";
 import { generateUniqueNumericId } from "./CategoriesList";
 
 interface AddSubcategoryProps {
-  selectedCategoryData: { subCategories: SubCategoryType[]; id: number } | null;
+  selectedCategoryData: { subCategories: SubCategoryType[]; id: number | undefined } | null;
   setSelectedCategoryData: React.Dispatch<
     React.SetStateAction<CategoryWithSubcategories>
   >; 
@@ -44,8 +44,9 @@ const AddSubcategory = ({
     const newSubcategory: SubCategoryType = {
       id: generateUniqueNumericId(),
       subCategoryName: inputValue.trim(),
-      subCategoryImage: localImageFile,
+      subCategoryImage: localImageFile?.name,
       categoryId: selectedCategoryData.id,
+      subCategoryImageFile: localImageFile
     };
 
     setSelectedCategoryData((prev) =>

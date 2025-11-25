@@ -4,6 +4,8 @@ import Modal from "@/components/ui/Modal";
 import CategoryForm from "./CategoryForm";
 import { CategoryWithSubcategories } from "@/types/categories";
 import { Dispatch, FormEvent, SetStateAction } from "react";
+import { fetchPostCategory } from "../services/categories";
+import { CloudFog } from "lucide-react";
 
 interface AddCategoryModalProps {
   handleToggleCreateModal: (categoryId?: number) => void;
@@ -20,9 +22,18 @@ const CategoryCreateModal = ({
   selectedCategoryData,
   setSelectedCategoryData,
 }: AddCategoryModalProps) => {
-  const onCreate = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-  };
+const onCreate = async (e: FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+
+  console.log(selectedCategoryData);
+
+  try {
+    const res = await fetchPostCategory(selectedCategoryData);
+    console.log(res);
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   return (
     <Modal
