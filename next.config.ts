@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
         destination:
           process.env.NODE_ENV === "production"
             ? "https://luxera-admin-api.onrender.com/:path*" // ← UPDATE THIS LATER
-            : "https://luxera-admin-api.onrender.com/:path*",
+            : "http://localhost:4001/:path*",
       },
     ];
   },

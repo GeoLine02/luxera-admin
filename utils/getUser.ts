@@ -15,7 +15,6 @@ export const getUser = async () => {
       },
     });
     const data = res.data;
-    console.log(data);
     return data;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {

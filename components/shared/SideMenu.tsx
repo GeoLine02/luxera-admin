@@ -17,6 +17,12 @@ const rotuesData = [
     href: "/produts",
     icon: "",
   },
+  {
+    key: "users",
+    lable: "Users",
+    href: "/users",
+    icon: "",
+  },
 ];
 
 const SideMenu = () => {
