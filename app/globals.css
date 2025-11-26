@@ -4,6 +4,14 @@ button {
   cursor: pointer;
 }
 
+html {
+  @apply text-white/70;
+}
+
+main {
+  @apply p-4;
+}
+
 .hover-transition {
   @apply duration-200 transition-colors ease-in-out;
 }
@@ -14,14 +22,7 @@ button {
 
 @theme {
   /* colors */
-  --color-blue-50: "#ebf8ff";
-  --color-blue-100: "#bee3f8";
-  --color-blue-200: "#90cdf4";
-  --color-blue-300: "#63b3ed";
-  --color-blue-400: "#4299e1";
-  --color-blue-500: "#3182ce";
-  --color-blue-600: "#2b6cb0";
-  --color-blue-700: "#2c5282";
-  --color-blue-800: "#2a4365";
-  --color-blue-900: "#1A365D";
+  --color-dark-gray: #101828;
+  --color-medium-gray: #364153;
+  --color-light-gray: #99a1af;
 }
