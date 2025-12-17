@@ -4,22 +4,23 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { ChangeEvent, useState } from "react";
-import { CategoryWithSubcategories, SubCategoryType } from "@/types/categories";
+import {
+  CategoryWithSubcategoriesDTO,
+  SubCategoryTypeDTO,
+} from "@/types/categories";
 import { InputImage } from "@/components/ui/ImageDrop";
 
 interface AddSubcategoryProps {
-  selectedCategoryData: { subCategories: SubCategoryType[]; id: number } | null;
+  selectedCategoryData: CategoryWithSubcategoriesDTO;
   setSelectedCategoryData: React.Dispatch<
-    React.SetStateAction<CategoryWithSubcategories>
-  >; 
+    React.SetStateAction<CategoryWithSubcategoriesDTO>
+  >;
 }
 
 const AddSubcategory = ({
   selectedCategoryData,
   setSelectedCategoryData,
 }: AddSubcategoryProps) => {
-
-
   const [inputValue, setInputValue] = useState("");
   const [localImageFile, setLocalImageFile] = useState<File | null>(null);
 
@@ -35,16 +36,15 @@ const AddSubcategory = ({
   const handleAdd = () => {
     if (!inputValue.trim() || !selectedCategoryData) return;
 
-    const exists = selectedCategoryData.subCategories.some(
-      (sub) => sub.subCategoryName === inputValue.trim()
+    const exists = selectedCategoryData.subcategories.some(
+      (sub) => sub.subcategoryName === inputValue.trim()
     );
     if (exists) return;
-
-    const newSubcategory: SubCategoryType = {
-      id:
-        Math.max(0, ...selectedCategoryData.subCategories.map((s) => s.id)) + 1,
-      subCategoryName: inputValue.trim(),
-      subCategoryImage: localImageFile,
+    if (!localImageFile) return;
+    const newSubcategory: SubCategoryTypeDTO = {
+      id: Math.random(),
+      subcategoryName: inputValue.trim(),
+      subcategoryImageFile: localImageFile,
       categoryId: selectedCategoryData.id,
     };
 
@@ -52,7 +52,7 @@ const AddSubcategory = ({
       prev
         ? {
             ...prev,
-            subCategories: [...prev.subCategories, newSubcategory],
+            subcategories: [...prev.subcategories, newSubcategory],
           }
         : prev
     );
@@ -60,7 +60,7 @@ const AddSubcategory = ({
     setInputValue("");
     setLocalImageFile(null);
   };
- 
+
   return (
     <div className="flex items-end gap-2 w-full">
       <div className="w-1/2 flex-col">
@@ -80,11 +80,11 @@ const AddSubcategory = ({
         <Label size="sm" variant="default" className="text-white mb-1">
           Image
         </Label>
-        <InputImage  
+        <InputImage
           variant="default"
           placeholder="Select Image"
           name="subCategoryImage"
-          onChange={handleImageChange}  
+          onChange={handleImageChange}
           value={localImageFile ? undefined : ""}
         />
       </div>

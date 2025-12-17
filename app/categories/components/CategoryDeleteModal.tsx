@@ -8,6 +8,7 @@ interface CategoryDeleteModalProps {
 
 const CategoryDeleteModal = ({
   handleCloseDeleteModal,
+  handleDeleteCategory,
 }: CategoryDeleteModalProps) => {
   return (
     <Modal modalTitle="Delete Category" onClose={handleCloseDeleteModal}>
@@ -16,10 +17,18 @@ const CategoryDeleteModal = ({
         be permament.
       </h1>
       <div className="flex justify-end gap-2">
-        <Button className="hover:bg-red-500 px-9" variant={"default"}>
+        <Button
+          className="hover:bg-red-500 px-9"
+          variant={"default"}
+          onClick={handleDeleteCategory}
+        >
           Delete
         </Button>
-        <Button className="px-9" variant={"default"}>
+        <Button
+          className="px-9"
+          variant={"default"}
+          onClick={handleCloseDeleteModal}
+        >
           Cancel
         </Button>
       </div>

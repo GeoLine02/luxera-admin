@@ -5,6 +5,7 @@ import { getUser } from "@/utils/getUser";
 import SideMenu from "@/components/shared/SideMenu";
 import { Poppins } from "next/font/google";
 import ReduxProvider from "@/providers/ReduxProvider";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "Luxera Admin",
@@ -27,6 +28,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={`${poppins.className} bg-dark-gray min-h-screen`}>
+        <Toaster position="bottom-center" reverseOrder={false} />
         <ReduxProvider>
           <UserProvider userData={userData?.user}>
             <div className="w-full flex h-full">

@@ -1,12 +1,17 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { CategoryType, CategoryWithSubcategories } from "@/types/categories";
+import { CategoryType, CategoryWithSubcategoriesDTO } from "@/types/categories";
 import { FormEvent, useState } from "react";
 import CategoryEditModal from "./CategoryEditModal";
 import CategoryDeleteModal from "./CategoryDeleteModal";
 import AddCategory from "./AddCategory";
 import CategoryCreateModal from "./CategoryCreateModal";
+
+import placeHolderImage from "@/public/placeholder.jpg";
+import { deleteCategory } from "../services/categories";
+import toast from "react-hot-toast";
+import { AxiosError } from "axios";
 
 interface CategoryCardProps {
   id: number;
@@ -21,11 +26,20 @@ const CategoryCard = ({
   categoryName,
   handleToggleDeleteModal,
   handleToggleEditModal,
+  categoryImage,
 }: CategoryCardProps) => {
   return (
     <div className="flex items-center justify-between w-full max-w-[49%] bg-medium-gray p-2 rounded-md">
       <div className="flex items-center gap-2">
-        <div className="w-14 aspect-square rounded-md bg-gray-500"></div>
+        <div className="w-14 aspect-square rounded-md bg-gray-500">
+          <img
+            src={categoryImage || placeHolderImage}
+            className="object-cover w-full h-full"
+            alt="categoryimage"
+            width={100}
+            height={100}
+          />
+        </div>
         <h1 className="font-medium">{categoryName}</h1>
       </div>
       <div className="flex gap-2 items-center">
@@ -53,26 +67,23 @@ export const CategoriesList = ({ categories }: CategoriesListProps) => {
     null
   );
   const [selectedCategoryData, setSelectedCategoryData] =
-    useState<CategoryWithSubcategories>({
-      categoryImage: "",
+    useState<CategoryWithSubcategoriesDTO>({
       categoryName: "",
-      id: Infinity,
-      subCategories: [],
+      subcategories: [],
       categoryImageFile: null,
     });
-
   const handleToggleEditModal = (categoryId?: number) => {
+    if (isEditModalOpen) {
+      setSelectedCategoryData({
+        categoryName: "",
+        subcategories: [],
+        categoryImageFile: null,
+      });
+    }
     setIsEditModalOpen(!isEditModalOpen);
     setSelectedCategoryId(categoryId ?? null);
-    if (isEditModalOpen)
-      setSelectedCategoryData({
-        categoryImage: "",
-        categoryName: "",
-        id: Infinity,
-        subCategories: [],
-      });
   };
-  console.log("selectedCategoryData", selectedCategoryData);
+
   const handleToggleDeleteModal = (categoryId?: number) => {
     setIsDeleteModalOpen(!isDeleteModalOpen);
     setSelectedCategoryId(categoryId ?? null);
@@ -82,37 +93,55 @@ export const CategoriesList = ({ categories }: CategoriesListProps) => {
     setIsCreateModalOpen(!isCreateModalOpen);
     if (isCreateModalOpen)
       setSelectedCategoryData({
-        categoryImage: "",
         categoryName: "",
-        id: Infinity,
-        subCategories: [],
+        subcategories: [],
       });
   };
 
   const handleEditCategory = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   };
-  const handleDeleteCategory = () => {};
+  const handleDeleteCategory = async () => {
+    handleToggleDeleteModal();
+    if (selectedCategoryId) {
+      try {
+        await deleteCategory(selectedCategoryId);
+        toast.success("Category deleted successfully");
+        setSelectedCategoryId(null);
+        // refresh
+        window.location.reload();
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          if (error.response?.data.message) {
+            toast.error(error.response?.data.message);
+            return;
+          }
+          toast.error("Something went wrong");
+          console.error("Failed to delete category:", error);
+        }
+      }
+    }
+  };
 
   const handleSelectCategoryData = (
-    categoryData: CategoryWithSubcategories
+    categoryData: CategoryWithSubcategoriesDTO
   ) => {
     setSelectedCategoryData(categoryData);
   };
 
   return (
     <div className="flex flex-wrap gap-2">
-      
-      {categories !== undefined && categories.map((category) => (
-        <CategoryCard
-          key={category?.id}
-          id={category?.id}
-          categoryImage=""
-          categoryName={category.categoryName}
-          handleToggleDeleteModal={handleToggleEditModal}
-          handleToggleEditModal={handleToggleEditModal}
-        />
-      ))}
+      {categories !== undefined &&
+        categories.map((category) => (
+          <CategoryCard
+            key={category?.id}
+            id={category?.id}
+            categoryImage={category.category_image}
+            categoryName={category.category_name}
+            handleToggleDeleteModal={handleToggleDeleteModal}
+            handleToggleEditModal={handleToggleEditModal}
+          />
+        ))}
       <AddCategory handleToggleCreateModal={handleToggleCreateModal} />
       {isEditModalOpen && (
         <CategoryEditModal

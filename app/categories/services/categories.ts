@@ -2,11 +2,10 @@ import api from "@/utils/axios";
 
 export const fetchCategories = async () => {
   try {
-    const res = await api.get(`${process.env.API_BASE_URL}/categories`);
+    const res = await api.get(`/categories`);
 
     if (res.status === 200) {
-      const data = res;
-      return data.data;
+      return res.data.data;
     }
   } catch (error) {
     console.log(error);
@@ -15,15 +14,59 @@ export const fetchCategories = async () => {
 
 export const fetchCategoryById = async (categoryId: number) => {
   try {
-    const res = await fetch(
-      `http://localhost:3000/api/categories/${categoryId}`
-    );
+    const res = await api.get(`/categories/${categoryId}`);
 
-    if (res.ok) {
-      const data = await res.json();
+    if (res.status === 200) {
+      const data = await res.data.data;
       return data;
     }
   } catch (error) {
     console.log(error);
+  }
+};
+
+export const createCategory = async (categoryData: FormData) => {
+  try {
+    const res = await api.post(`/categories`, categoryData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    if (res.status === 201 || res.status === 200) {
+      return res.data;
+    }
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+export const updateCategory = async (
+  categoryId: number,
+  categoryData: FormData
+) => {
+  try {
+    const res = await api.patch(`/categories/${categoryId}`, categoryData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    if (res.status === 200 || res.status === 201) {
+      return res.data;
+    }
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+export const deleteCategory = async (categoryId: number) => {
+  try {
+    const res = await api.delete(`/categories/${categoryId}`);
+    if (res.status === 200) {
+      return res.data;
+    }
+  } catch (error) {
+    console.log(error);
+    throw error;
   }
 };
