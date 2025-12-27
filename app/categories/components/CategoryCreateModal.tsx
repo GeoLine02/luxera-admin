@@ -13,7 +13,7 @@ import { AxiosError } from "axios";
 
 interface AddCategoryModalProps {
   handleToggleCreateModal: (categoryId?: number) => void;
-  handleDeleteSubCategory: (categoryId: number) => void;
+  handleDeleteSubcategory: (categoryId: number) => void;
   handleSelectCategoryData: (
     categoryData: CategoryWithSubcategoriesDTO
   ) => void;
@@ -26,7 +26,7 @@ interface AddCategoryModalProps {
 
 const CategoryCreateModal = ({
   handleToggleCreateModal,
-  handleDeleteSubCategory,
+  handleDeleteSubcategory,
   selectedCategoryData,
   setSelectedCategoryData,
 }: AddCategoryModalProps) => {
@@ -37,8 +37,11 @@ const CategoryCreateModal = ({
     try {
       // Create FormData to handle file upload
       const formData = new FormData();
+
       formData.append("categoryName", selectedCategoryData.categoryName);
+
       // Add image file if it exists
+
       if (!selectedCategoryData.categoryImageFile) return; // or raise validation error
       formData.append("categoryImage", selectedCategoryData.categoryImageFile);
       const subcategoryImagesMap: Record<number, File> = {};
@@ -46,13 +49,17 @@ const CategoryCreateModal = ({
         .map((subcat: SubCategoryTypeDTO, index: number) => {
           if (!subcat.subcategoryImageFile) return null;
           subcategoryImagesMap[index] = subcat.subcategoryImageFile;
-          return subcat.subcategoryName;
+          return {
+            subcategoryName: subcat.subcategoryName,
+          };
         })
         .filter((name) => name !== null);
       formData.append("subcategories", JSON.stringify(subcategories));
+
       for (const [index, file] of Object.entries(subcategoryImagesMap)) {
         formData.append(`subcategoryImage_${index}`, file);
       }
+
       const response = await createCategory(formData);
       console.log("response", response);
 
@@ -88,7 +95,7 @@ const CategoryCreateModal = ({
       <CategoryForm
         setSelectedCategoryData={setSelectedCategoryData}
         selectedCategoryData={selectedCategoryData}
-        handleDeleteSubCategory={handleDeleteSubCategory}
+        handleDeleteSubcategory={handleDeleteSubcategory}
         onSubmit={onCreate}
         actionName="create"
       />

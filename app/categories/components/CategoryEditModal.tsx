@@ -23,11 +23,12 @@ interface CategoryEditModalProps {
   setSelectedCategoryData: React.Dispatch<
     React.SetStateAction<CategoryWithSubcategoriesDTO>
   >;
+  handleDeleteSubcategory: (subcategoryId: number) => void;
 }
 
 const CategoryEditModal = ({
   handleToggleEditModal,
-
+  handleDeleteSubcategory,
   selectedCategoryId,
   selectedCategoryData,
   setSelectedCategoryData,
@@ -69,59 +70,108 @@ const CategoryEditModal = ({
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData();
-    console.log("დასააპდეითებელი ", selectedCategoryData);
     if (!selectedCategoryId) return;
-    formData.append("categoryName", selectedCategoryData.categoryName);
+
+    // Validate before submitting
+    const errors: string[] = [];
+
+    // Check if there are any changes
+    const hasChanges =
+      selectedCategoryData.categoryName.trim() !== "" ||
+      selectedCategoryData.categoryImageFile ||
+      selectedCategoryData.subcategories.length > 0 ||
+      (selectedCategoryData.deletedSubcategories &&
+        selectedCategoryData.deletedSubcategories.length > 0);
+
+    if (!hasChanges) {
+      return;
+    }
+
+    // Validate subcategories
+    selectedCategoryData.subcategories.forEach((subcat, index) => {
+      if (!subcat.subcategoryName.trim()) {
+        errors.push(`Subcategory ${index + 1} name is required`);
+      }
+
+      // New subcategories must have images
+      if (!subcat.id && !subcat.subcategoryImageFile) {
+        errors.push(`Subcategory ${index + 1} needs an image`);
+      }
+    });
+
+    if (errors.length > 0) {
+      toast.error(errors[0]); // Show first error
+      return;
+    }
+
+    // Build form data
+    const formData = new FormData();
+
+    // Only append if not empty
+    if (selectedCategoryData.categoryName.trim()) {
+      formData.append("categoryName", selectedCategoryData.categoryName.trim());
+    }
 
     if (selectedCategoryData.categoryImageFile) {
       formData.append("categoryImage", selectedCategoryData.categoryImageFile);
     }
+
     const subcategoryImagesMap: Record<number, File> = {};
-    const subcategories = selectedCategoryData.subcategories.map(
-      (subcat: SubCategoryTypeDTO, index: number) => {
+    const subcategories: SubCategoryTypeDTO[] =
+      selectedCategoryData.subcategories.map((subcat, index) => {
         if (subcat.subcategoryImageFile) {
           subcategoryImagesMap[index] = subcat.subcategoryImageFile;
+        }
+
+        // Existing subcategory (has valid ID)
+        if (subcat.id && Number.isInteger(subcat.id) && subcat.id > 0) {
           return {
-            subcategoryName: subcat.subcategoryName,
+            id: subcat.id,
+            subcategoryName: subcat.subcategoryName.trim(),
           };
         }
+
+        // New subcategory (no ID)
         return {
-          id: subcat.id,
-          subcategoryName: subcat.subcategoryName,
+          subcategoryName: subcat.subcategoryName.trim(),
         };
-      }
-    );
-    formData.append("subcategories", JSON.stringify(subcategories));
+      });
+
+    // Only append if there are subcategories
+    if (subcategories && subcategories.length > 0) {
+      formData.append("subcategories", JSON.stringify(subcategories));
+    }
+
     for (const [index, file] of Object.entries(subcategoryImagesMap)) {
       formData.append(`subcategoryImage_${index}`, file);
     }
+
+    if (
+      selectedCategoryData.deletedSubcategories &&
+      selectedCategoryData.deletedSubcategories.length > 0
+    ) {
+      formData.append(
+        "deletedSubcategoryIds",
+        JSON.stringify(selectedCategoryData.deletedSubcategories)
+      );
+    }
+    console.log("დასააფდეითებელი დატა", selectedCategoryData);
     try {
       const response = await updateCategory(selectedCategoryId, formData);
       toast.success(response.message);
-      handleToggleEditModal();
+      handleToggleEditModal(); // Close on success
     } catch (error) {
+      // Keep modal open on error so user can fix it
       if (error instanceof AxiosError) {
-        if (error.response?.data.message) {
-          toast.error(error.response?.data.message);
-          return;
-        }
-        toast.error("Something went wrong");
+        const message =
+          error.response?.data?.message || "Failed to update category";
+        toast.error(message);
         console.error("Failed to update category:", error);
+      } else {
+        toast.error("Something went wrong");
+        console.error(error);
       }
     }
-  };
-
-  const handleDeleteSubCategory = (subcategoryId: number) => {
-    const filteredsubcategories = selectedCategoryData?.subcategories.filter(
-      (subcategory: SubCategoryTypeDTO) => subcategory.id !== subcategoryId
-    ) as SubCategoryTypeDTO[];
-    setSelectedCategoryData((prevValues) => {
-      return {
-        ...prevValues,
-        subCategories: filteredsubcategories,
-      };
-    });
   };
 
   return (
@@ -132,7 +182,7 @@ const CategoryEditModal = ({
     >
       <CategoryForm
         actionName="edit"
-        handleDeleteSubCategory={handleDeleteSubCategory}
+        handleDeleteSubcategory={handleDeleteSubcategory}
         selectedCategoryData={selectedCategoryData}
         onSubmit={onSubmit}
         setSelectedCategoryData={setSelectedCategoryData}

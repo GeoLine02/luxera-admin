@@ -1,7 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { CategoryType, CategoryWithSubcategoriesDTO } from "@/types/categories";
+import {
+  CategoryType,
+  CategoryWithSubcategoriesDTO,
+  SubCategoryTypeDTO,
+} from "@/types/categories";
 import { FormEvent, useState } from "react";
 import CategoryEditModal from "./CategoryEditModal";
 import CategoryDeleteModal from "./CategoryDeleteModal";
@@ -12,47 +16,7 @@ import placeHolderImage from "@/public/placeholder.jpg";
 import { deleteCategory } from "../services/categories";
 import toast from "react-hot-toast";
 import { AxiosError } from "axios";
-
-interface CategoryCardProps {
-  id: number;
-  categoryName: string;
-  categoryImage: string;
-  handleToggleDeleteModal: (categoryId: number) => void;
-  handleToggleEditModal: (categoryId: number) => void;
-}
-
-const CategoryCard = ({
-  id,
-  categoryName,
-  handleToggleDeleteModal,
-  handleToggleEditModal,
-  categoryImage,
-}: CategoryCardProps) => {
-  return (
-    <div className="flex items-center justify-between w-full max-w-[49%] bg-medium-gray p-2 rounded-md">
-      <div className="flex items-center gap-2">
-        <div className="w-14 aspect-square rounded-md bg-gray-500">
-          <img
-            src={categoryImage || placeHolderImage}
-            className="object-cover w-full h-full"
-            alt="categoryimage"
-            width={100}
-            height={100}
-          />
-        </div>
-        <h1 className="font-medium">{categoryName}</h1>
-      </div>
-      <div className="flex gap-2 items-center">
-        <Button onClick={() => handleToggleEditModal(id)} variant="default">
-          Edit
-        </Button>
-        <Button onClick={() => handleToggleDeleteModal(id)} variant="default">
-          Delete
-        </Button>
-      </div>
-    </div>
-  );
-};
+import CategoryCard from "./CategoryCard";
 
 interface CategoriesListProps {
   categories: CategoryType[];
@@ -71,7 +35,11 @@ export const CategoriesList = ({ categories }: CategoriesListProps) => {
       categoryName: "",
       subcategories: [],
       categoryImageFile: null,
+      categoryImageUrl: undefined,
+      id: undefined,
+      deletedSubcategories: undefined,
     });
+
   const handleToggleEditModal = (categoryId?: number) => {
     if (isEditModalOpen) {
       setSelectedCategoryData({
@@ -101,6 +69,30 @@ export const CategoriesList = ({ categories }: CategoriesListProps) => {
   const handleEditCategory = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   };
+  // ...existing code...
+  const handleDeleteSubcategory = (subcategoryId: number) => {
+    const filteredSubcategories = selectedCategoryData?.subcategories.filter(
+      (subcategory: SubCategoryTypeDTO) => subcategory.id !== subcategoryId
+    ) as SubCategoryTypeDTO[];
+
+    const shouldAddToDeleted =
+      Number.isInteger(subcategoryId) && subcategoryId > 0;
+
+    setSelectedCategoryData((prevValues) => {
+      return {
+        ...prevValues,
+        subcategories: filteredSubcategories, // Consistent naming
+        deletedSubcategories: shouldAddToDeleted
+          ? [
+              ...(prevValues.deletedSubcategories || []), // Handle undefined
+              subcategoryId,
+            ]
+          : prevValues.deletedSubcategories, // don't add client-generated ids
+      };
+    });
+  };
+
+  // ...existing code...
   const handleDeleteCategory = async () => {
     handleToggleDeleteModal();
     if (selectedCategoryId) {
@@ -145,6 +137,7 @@ export const CategoriesList = ({ categories }: CategoriesListProps) => {
       <AddCategory handleToggleCreateModal={handleToggleCreateModal} />
       {isEditModalOpen && (
         <CategoryEditModal
+          handleDeleteSubcategory={handleDeleteSubcategory}
           setSelectedCategoryData={setSelectedCategoryData}
           handleSelectCategoryData={handleSelectCategoryData}
           selectedCategoryData={selectedCategoryData}
@@ -158,8 +151,8 @@ export const CategoriesList = ({ categories }: CategoriesListProps) => {
           selectedCategoryId={selectedCategoryId}
           setSelectedCategoryData={setSelectedCategoryData}
           selectedCategoryData={selectedCategoryData}
+          handleDeleteSubcategory={handleDeleteSubcategory}
           handleSelectCategoryData={handleSelectCategoryData}
-          handleDeleteSubCategory={handleDeleteCategory}
           handleToggleCreateModal={handleToggleCreateModal}
         />
       )}

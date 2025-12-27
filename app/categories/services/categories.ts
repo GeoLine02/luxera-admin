@@ -46,11 +46,16 @@ export const updateCategory = async (
   categoryData: FormData
 ) => {
   try {
-    const res = await api.patch(`/categories/${categoryId}`, categoryData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const res = await api.patch(
+      `/categories/${categoryId}/batch`,
+      categoryData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
     if (res.status === 200 || res.status === 201) {
       return res.data;
     }

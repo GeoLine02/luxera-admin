@@ -16,6 +16,7 @@ interface SubCategoryTypeDTO {
 
 interface CategoryWithSubcategoriesDTO extends CategoryTypeDTO {
   subcategories: SubCategoryTypeDTO[];
+  deletedSubcategories?: number[];
 }
 // Server Response Data
 interface CategoryType {

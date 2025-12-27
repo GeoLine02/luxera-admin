@@ -2,23 +2,20 @@
 
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
-import {
-  CategoryTypeDTO,
-  CategoryWithSubcategoriesDTO,
-} from "@/types/categories";
+import { CategoryWithSubcategoriesDTO } from "@/types/categories";
 import React, { ChangeEvent, Dispatch, FormEvent, SetStateAction } from "react";
 import { SubCategoriesList } from "./SubCategoriesList";
 import AddSubcategory from "./AddSubcategory";
 import { Button } from "@/components/ui/Button";
 import { InputImage } from "@/components/ui/ImageDrop";
-
+import Image from "next/image";
 interface CategoryFormProps {
   actionName: "create" | "edit";
   setSelectedCategoryData: Dispatch<
     SetStateAction<CategoryWithSubcategoriesDTO>
   >;
   selectedCategoryData: CategoryWithSubcategoriesDTO;
-  handleDeleteSubCategory: (categoryId: number) => void;
+  handleDeleteSubcategory: (categoryId: number) => void;
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;
 }
 
@@ -26,7 +23,7 @@ const CategoryForm = ({
   actionName,
   setSelectedCategoryData,
   selectedCategoryData,
-  handleDeleteSubCategory,
+  handleDeleteSubcategory,
   onSubmit,
 }: CategoryFormProps) => {
   const isEdit = actionName === "edit";
@@ -135,7 +132,7 @@ const CategoryForm = ({
       {/* SUBCATEGORIES */}
       {selectedCategoryData?.subcategories && (
         <SubCategoriesList
-          handleDeleteSubCategory={handleDeleteSubCategory}
+          handleDeleteSubcategory={handleDeleteSubcategory}
           subCategories={selectedCategoryData.subcategories}
         />
       )}
