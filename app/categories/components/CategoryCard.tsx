@@ -22,7 +22,7 @@ const CategoryCard = ({
       <div className="flex items-center gap-2">
         <div className="w-14 aspect-square rounded-md bg-gray-500">
           <img
-            src={categoryImage || placeHolderImage}
+            src={categoryImage}
             className="object-cover w-full h-full"
             alt="categoryimage"
             width={100}

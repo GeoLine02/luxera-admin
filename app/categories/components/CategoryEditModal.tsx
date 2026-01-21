@@ -16,7 +16,7 @@ interface CategoryEditModalProps {
   handleToggleEditModal: (categoryId?: number) => void;
   handleEditCategory: (e: FormEvent<HTMLFormElement>) => void;
   handleSelectCategoryData: (
-    categoryData: CategoryWithSubcategoriesDTO
+    categoryData: CategoryWithSubcategoriesDTO,
   ) => void;
   selectedCategoryId: number | null;
   selectedCategoryData: CategoryWithSubcategoriesDTO;
@@ -37,9 +37,8 @@ const CategoryEditModal = ({
     const handleFetchCategory = async () => {
       if (selectedCategoryId) {
         try {
-          const data: CategoryDetailsType = await fetchCategoryById(
-            selectedCategoryId
-          );
+          const data: CategoryDetailsType =
+            await fetchCategoryById(selectedCategoryId);
           const correctData: CategoryWithSubcategoriesDTO = {
             id: data.id,
             categoryImageUrl: data.category_image,
@@ -116,45 +115,20 @@ const CategoryEditModal = ({
       formData.append("categoryImage", selectedCategoryData.categoryImageFile);
     }
 
-    const subcategoryImagesMap: Record<number, File> = {};
-    const subcategories: SubCategoryTypeDTO[] =
-      selectedCategoryData.subcategories.map((subcat, index) => {
-        if (subcat.subcategoryImageFile) {
-          subcategoryImagesMap[index] = subcat.subcategoryImageFile;
-        }
-
-        // Existing subcategory (has valid ID)
-        if (subcat.id && Number.isInteger(subcat.id) && subcat.id > 0) {
-          return {
-            id: subcat.id,
-            subcategoryName: subcat.subcategoryName.trim(),
-          };
-        }
-
-        // New subcategory (no ID)
+    const subcategories = selectedCategoryData.subcategories.map((subcat) => {
+      if (subcat.subcategoryImageFile) {
+        formData.append(
+          `subcategoryImage_${subcat.id}`,
+          subcat.subcategoryImageFile,
+        );
         return {
-          subcategoryName: subcat.subcategoryName.trim(),
+          subcategoryName: subcat.subcategoryName,
+          tempId: subcat.id,
         };
-      });
+      }
+    });
+    formData.append("subcategories", JSON.stringify(subcategories));
 
-    // Only append if there are subcategories
-    if (subcategories && subcategories.length > 0) {
-      formData.append("subcategories", JSON.stringify(subcategories));
-    }
-
-    for (const [index, file] of Object.entries(subcategoryImagesMap)) {
-      formData.append(`subcategoryImage_${index}`, file);
-    }
-
-    if (
-      selectedCategoryData.deletedSubcategories &&
-      selectedCategoryData.deletedSubcategories.length > 0
-    ) {
-      formData.append(
-        "deletedSubcategoryIds",
-        JSON.stringify(selectedCategoryData.deletedSubcategories)
-      );
-    }
     console.log("დასააფდეითებელი დატა", selectedCategoryData);
     try {
       const response = await updateCategory(selectedCategoryId, formData);

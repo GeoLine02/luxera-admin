@@ -41,6 +41,7 @@ export const createCategory = async (categoryData: FormData) => {
     throw error;
   }
 };
+
 export const updateCategory = async (
   categoryId: number,
   categoryData: FormData
