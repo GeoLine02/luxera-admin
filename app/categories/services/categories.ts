@@ -44,18 +44,14 @@ export const createCategory = async (categoryData: FormData) => {
 
 export const updateCategory = async (
   categoryId: number,
-  categoryData: FormData
+  categoryData: FormData,
 ) => {
   try {
-    const res = await api.patch(
-      `/categories/${categoryId}/batch`,
-      categoryData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+    const res = await api.put(`/categories/${categoryId}`, categoryData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
     if (res.status === 200 || res.status === 201) {
       return res.data;

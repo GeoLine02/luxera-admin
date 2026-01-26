@@ -28,7 +28,7 @@ const CategoryForm = ({
 }: CategoryFormProps) => {
   const isEdit = actionName === "edit";
   const [imagePreviewUrl, setImagePreviewUrl] = React.useState<string | null>(
-    null
+    null,
   );
   console.log("selectedCategoryData: ", selectedCategoryData);
 
@@ -39,7 +39,7 @@ const CategoryForm = ({
   };
 
   const onCategoryInputImageChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const files = e.target.files;
     const selectedFile = files && files.length > 0 ? files[0] : null;
@@ -76,13 +76,7 @@ const CategoryForm = ({
                   // Preview takes precedence (new upload), fallback to existing category image
                   const displayUrl =
                     imagePreviewUrl || selectedCategoryData?.categoryImageUrl;
-
-                  if (!displayUrl) {
-                    return (
-                      <span className="text-gray-400">No Image Selected</span>
-                    );
-                  }
-
+                  console.log("preview Url", imagePreviewUrl);
                   return (
                     <img
                       src={displayUrl}
@@ -92,13 +86,6 @@ const CategoryForm = ({
                           : "Current Category Image"
                       }
                       className="object-contain w-full h-full"
-                      onError={(e) => {
-                        // Handle broken images gracefully
-                        e.currentTarget.style.display = "none";
-                        e.currentTarget.parentElement
-                          ?.querySelector(".fallback-text")
-                          ?.classList.remove("hidden");
-                      }}
                     />
                   );
                 })()}
@@ -106,7 +93,6 @@ const CategoryForm = ({
                   Failed to load image
                 </span>
               </div>
-
               <InputImage
                 variant="default"
                 name="categoryImage"

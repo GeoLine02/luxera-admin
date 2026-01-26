@@ -15,7 +15,7 @@ interface AddCategoryModalProps {
   handleToggleCreateModal: (categoryId?: number) => void;
   handleDeleteSubcategory: (categoryId: number) => void;
   handleSelectCategoryData: (
-    categoryData: CategoryWithSubcategoriesDTO
+    categoryData: CategoryWithSubcategoriesDTO,
   ) => void;
   selectedCategoryData: CategoryWithSubcategoriesDTO;
   selectedCategoryId: number | null;
@@ -43,22 +43,25 @@ const CategoryCreateModal = ({
       // Add image file if it exists
 
       if (!selectedCategoryData.categoryImageFile) return; // or raise validation error
+
       formData.append("categoryImage", selectedCategoryData.categoryImageFile);
-      const subcategoryImagesMap: Record<number, File> = {};
-      const subcategories = selectedCategoryData.subcategories
-        .map((subcat: SubCategoryTypeDTO, index: number) => {
-          if (!subcat.subcategoryImageFile) return null;
-          subcategoryImagesMap[index] = subcat.subcategoryImageFile;
+
+      const subcategories = selectedCategoryData.subcategories.map(
+        (subcat: SubCategoryTypeDTO) => {
+          if (subcat.subcategoryImageFile)
+            formData.append(
+              `subcategoryImage_${subcat.id}`,
+              subcat.subcategoryImageFile,
+            );
+
           return {
+            tempId: subcat.id,
             subcategoryName: subcat.subcategoryName,
           };
-        })
-        .filter((name) => name !== null);
-      formData.append("subcategories", JSON.stringify(subcategories));
+        },
+      );
 
-      for (const [index, file] of Object.entries(subcategoryImagesMap)) {
-        formData.append(`subcategoryImage_${index}`, file);
-      }
+      formData.append("subcategories", JSON.stringify(subcategories));
 
       const response = await createCategory(formData);
       console.log("response", response);

@@ -7,11 +7,12 @@ interface CategoryTypeDTO {
 }
 
 interface SubCategoryTypeDTO {
-  id?: number;
+  id: number | string;
   subcategoryName: string;
   categoryId?: number;
   subcategoryImageFile?: File | null;
   subcategoryImageUrl?: string;
+  isNew?: boolean;
 }
 
 interface CategoryWithSubcategoriesDTO extends CategoryTypeDTO {
@@ -22,12 +23,13 @@ interface CategoryWithSubcategoriesDTO extends CategoryTypeDTO {
 interface CategoryType {
   id: number;
   category_name: string;
-  category_image: string;
+  category_name_ka: string;
+  imageUrl: string;
 }
 interface SubCategoryType {
   id: 13;
   sub_category_name: string;
-  sub_category_image: string;
+  imageUrl: string;
   category_id: number;
 }
 interface CategoryDetailsType extends CategoryType {

@@ -1,15 +1,19 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import api from "./utils/axios";
 
 async function refreshAccessToken(refreshToken: string) {
   try {
-    const res = await fetch(`${process.env.API_BASE_URL}/auth/refresh`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        authorization: `Bearer ${refreshToken}`,
+    const res = await fetch(
+      `${process.env.NODE_ENV === "production" ? process.env.API_URL_SERVER : "localhost:4001"}/auth/refresh`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${refreshToken}`,
+        },
       },
-    });
+    );
 
     if (!res.ok) return null;
     return res.json();

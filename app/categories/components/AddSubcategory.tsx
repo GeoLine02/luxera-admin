@@ -9,7 +9,7 @@ import {
   SubCategoryTypeDTO,
 } from "@/types/categories";
 import { InputImage } from "@/components/ui/ImageDrop";
-
+import { v4 } from "uuid";
 interface AddSubcategoryProps {
   selectedCategoryData: CategoryWithSubcategoriesDTO;
   setSelectedCategoryData: React.Dispatch<
@@ -37,15 +37,17 @@ const AddSubcategory = ({
     if (!inputValue.trim() || !selectedCategoryData) return;
 
     const exists = selectedCategoryData.subcategories.some(
-      (sub) => sub.subcategoryName === inputValue.trim()
+      (sub) => sub.subcategoryName === inputValue.trim(),
     );
     if (exists) return;
     if (!localImageFile) return;
+
     const newSubcategory: SubCategoryTypeDTO = {
-      id: Math.random(),
+      id: v4(),
       subcategoryName: inputValue.trim(),
       subcategoryImageFile: localImageFile,
       categoryId: selectedCategoryData.id,
+      isNew: true,
     };
 
     setSelectedCategoryData((prev) =>
@@ -54,7 +56,7 @@ const AddSubcategory = ({
             ...prev,
             subcategories: [...prev.subcategories, newSubcategory],
           }
-        : prev
+        : prev,
     );
 
     setInputValue("");

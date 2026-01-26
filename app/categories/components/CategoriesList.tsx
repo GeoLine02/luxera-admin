@@ -28,7 +28,7 @@ export const CategoriesList = ({ categories }: CategoriesListProps) => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
 
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
-    null
+    null,
   );
   const [selectedCategoryData, setSelectedCategoryData] =
     useState<CategoryWithSubcategoriesDTO>({
@@ -70,28 +70,18 @@ export const CategoriesList = ({ categories }: CategoriesListProps) => {
     e.preventDefault();
   };
   // ...existing code...
-  const handleDeleteSubcategory = (subcategoryId: number) => {
+  const handleDeleteSubcategory = (subcategoryId: number | string) => {
     const filteredSubcategories = selectedCategoryData?.subcategories.filter(
-      (subcategory: SubCategoryTypeDTO) => subcategory.id !== subcategoryId
+      (subcategory: SubCategoryTypeDTO) => subcategory.id !== subcategoryId,
     ) as SubCategoryTypeDTO[];
-
-    const shouldAddToDeleted =
-      Number.isInteger(subcategoryId) && subcategoryId > 0;
 
     setSelectedCategoryData((prevValues) => {
       return {
         ...prevValues,
         subcategories: filteredSubcategories, // Consistent naming
-        deletedSubcategories: shouldAddToDeleted
-          ? [
-              ...(prevValues.deletedSubcategories || []), // Handle undefined
-              subcategoryId,
-            ]
-          : prevValues.deletedSubcategories, // don't add client-generated ids
       };
     });
   };
-
   // ...existing code...
   const handleDeleteCategory = async () => {
     handleToggleDeleteModal();
@@ -116,7 +106,7 @@ export const CategoriesList = ({ categories }: CategoriesListProps) => {
   };
 
   const handleSelectCategoryData = (
-    categoryData: CategoryWithSubcategoriesDTO
+    categoryData: CategoryWithSubcategoriesDTO,
   ) => {
     setSelectedCategoryData(categoryData);
   };
@@ -128,7 +118,7 @@ export const CategoriesList = ({ categories }: CategoriesListProps) => {
           <CategoryCard
             key={category?.id}
             id={category?.id}
-            categoryImage={category.category_image}
+            categoryImage={category.imageUrl}
             categoryName={category.category_name}
             handleToggleDeleteModal={handleToggleDeleteModal}
             handleToggleEditModal={handleToggleEditModal}

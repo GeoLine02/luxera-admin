@@ -41,13 +41,13 @@ const CategoryEditModal = ({
             await fetchCategoryById(selectedCategoryId);
           const correctData: CategoryWithSubcategoriesDTO = {
             id: data.id,
-            categoryImageUrl: data.category_image,
+            categoryImageUrl: data.imageUrl,
             categoryName: data.category_name,
             subcategories: data.subCategories.map((subcat) => ({
               id: subcat.id,
               categoryId: subcat.category_id,
               subcategoryName: subcat.sub_category_name,
-              subcategoryImageUrl: subcat.sub_category_image,
+              subcategoryImageUrl: subcat.imageUrl,
             })),
           };
           setSelectedCategoryData(correctData);
@@ -81,7 +81,6 @@ const CategoryEditModal = ({
       selectedCategoryData.subcategories.length > 0 ||
       (selectedCategoryData.deletedSubcategories &&
         selectedCategoryData.deletedSubcategories.length > 0);
-
     if (!hasChanges) {
       return;
     }
@@ -121,15 +120,18 @@ const CategoryEditModal = ({
           `subcategoryImage_${subcat.id}`,
           subcat.subcategoryImageFile,
         );
-        return {
-          subcategoryName: subcat.subcategoryName,
-          tempId: subcat.id,
-        };
       }
+      return {
+        subcategoryName: subcat.subcategoryName,
+        id: subcat.id,
+        isNew: subcat.isNew ? true : false,
+      };
     });
     formData.append("subcategories", JSON.stringify(subcategories));
-
-    console.log("დასააფდეითებელი დატა", selectedCategoryData);
+    console.log("დასააფდეითებელი დატა", {
+      subcategories,
+      selectedCategoryData,
+    });
     try {
       const response = await updateCategory(selectedCategoryId, formData);
       toast.success(response.message);
