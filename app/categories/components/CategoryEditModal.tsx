@@ -1,168 +1,232 @@
 "use client";
 
+import { useEffect, useState, useCallback } from "react";
 import Modal from "@/components/ui/Modal";
+import { useForm, useFieldArray } from "react-hook-form";
 import {
-  CategoryDetailsType,
-  CategoryWithSubcategoriesDTO,
-  SubCategoryTypeDTO,
+  UpdateCategoryFormValues,
+  CategoryResponse,
+  SubCategoryResponse,
 } from "@/types/categories";
-import { FormEvent, useEffect } from "react";
 import { fetchCategoryById, updateCategory } from "../services/categories";
-import CategoryForm from "./CategoryForm";
 import toast from "react-hot-toast";
 import { AxiosError } from "axios";
+import UpdateCategoriesForm from "./UpdateCategoriesForm";
+import { v4 } from "uuid";
 
 interface CategoryEditModalProps {
-  handleToggleEditModal: (categoryId?: number) => void;
-  handleEditCategory: (e: FormEvent<HTMLFormElement>) => void;
-  handleSelectCategoryData: (
-    categoryData: CategoryWithSubcategoriesDTO,
-  ) => void;
-  selectedCategoryId: number | null;
-  selectedCategoryData: CategoryWithSubcategoriesDTO;
-  setSelectedCategoryData: React.Dispatch<
-    React.SetStateAction<CategoryWithSubcategoriesDTO>
-  >;
-  handleDeleteSubcategory: (subcategoryId: number) => void;
+  categoryId: number;
+  handleToggleEditModal: (id: number | undefined) => void;
+  onSuccess?: () => void; // Callback to refresh parent data
 }
 
 const CategoryEditModal = ({
+  categoryId,
   handleToggleEditModal,
-  handleDeleteSubcategory,
-  selectedCategoryId,
-  selectedCategoryData,
-  setSelectedCategoryData,
+  onSuccess,
 }: CategoryEditModalProps) => {
+  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [categoryData, setCategoryData] = useState<CategoryResponse | null>(
+    null,
+  );
+  const [error, setError] = useState<string | null>(null);
+
+  const {
+    control,
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting, isDirty },
+    reset,
+    watch,
+  } = useForm<UpdateCategoryFormValues>({
+    defaultValues: {
+      categoryName: "",
+      categoryNameKa: "",
+      categoryImage: null,
+      categoryImageS3Key: undefined,
+      subCategories: [],
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "subCategories",
+  });
+
+  // Fetch category data on mount
   useEffect(() => {
-    const handleFetchCategory = async () => {
-      if (selectedCategoryId) {
-        try {
-          const data: CategoryDetailsType =
-            await fetchCategoryById(selectedCategoryId);
-          const correctData: CategoryWithSubcategoriesDTO = {
-            id: data.id,
-            categoryImageUrl: data.imageUrl,
-            categoryName: data.category_name,
-            subcategories: data.subCategories.map((subcat) => ({
-              id: subcat.id,
-              categoryId: subcat.category_id,
-              subcategoryName: subcat.sub_category_name,
-              subcategoryImageUrl: subcat.imageUrl,
-            })),
-          };
-          setSelectedCategoryData(correctData);
-        } catch (e) {
-          console.log(e);
-          if (e instanceof AxiosError) {
-            toast.error(e.response?.data.message);
-            console.log(e.response?.data.message);
-            return;
-          }
-          toast.error("Something went wrong");
-          console.log("Something went wrong");
-        }
+    const loadCategoryData = async () => {
+      try {
+        setIsLoadingData(true);
+        setError(null);
+
+        const response = await fetchCategoryById(categoryId);
+        setCategoryData(response.data);
+
+        // Transform API response to form values
+        const formValues: UpdateCategoryFormValues = {
+          categoryName: response.data.category_name,
+          categoryNameKa: response.data.category_name_ka,
+          categoryImage: null, // Files can't be set as default
+          categoryImageS3Key: response.data.category_image_s3_key,
+          subCategories: response.data.subCategories.map(
+            (sub: SubCategoryResponse) => ({
+              id: sub.id, // Store DB ID to differentiate from new items
+              subcategoryName: sub.sub_category_name,
+              subcategoryNameKa: sub.sub_category_name_ka,
+              subcategoryImage: null, // Files can't be set as default
+              subcategoryImageUrl: sub.imageUrl,
+              subcategoryImageS3Key: sub.subcategory_image_s3_key,
+            }),
+          ),
+        };
+
+        reset(formValues);
+      } catch (err) {
+        const message =
+          err instanceof AxiosError
+            ? err.response?.data?.message || "Failed to load category"
+            : "Failed to load category";
+        setError(message);
+        console.error(err);
+        toast.error(message);
+      } finally {
+        setIsLoadingData(false);
       }
     };
 
-    handleFetchCategory();
-  }, [selectedCategoryId, setSelectedCategoryData]);
-
-  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!selectedCategoryId) return;
-
-    // Validate before submitting
-    const errors: string[] = [];
-
-    // Check if there are any changes
-    const hasChanges =
-      selectedCategoryData.categoryName.trim() !== "" ||
-      selectedCategoryData.categoryImageFile ||
-      selectedCategoryData.subcategories.length > 0 ||
-      (selectedCategoryData.deletedSubcategories &&
-        selectedCategoryData.deletedSubcategories.length > 0);
-    if (!hasChanges) {
-      return;
+    if (categoryId) {
+      loadCategoryData();
     }
+  }, [categoryId, reset]);
 
-    // Validate subcategories
-    selectedCategoryData.subcategories.forEach((subcat, index) => {
-      if (!subcat.subcategoryName.trim()) {
-        errors.push(`Subcategory ${index + 1} name is required`);
-      }
-
-      // New subcategories must have images
-      if (!subcat.id && !subcat.subcategoryImageFile) {
-        errors.push(`Subcategory ${index + 1} needs an image`);
-      }
-    });
-
-    if (errors.length > 0) {
-      toast.error(errors[0]); // Show first error
-      return;
-    }
-
-    // Build form data
-    const formData = new FormData();
-
-    // Only append if not empty
-    if (selectedCategoryData.categoryName.trim()) {
-      formData.append("categoryName", selectedCategoryData.categoryName.trim());
-    }
-
-    if (selectedCategoryData.categoryImageFile) {
-      formData.append("categoryImage", selectedCategoryData.categoryImageFile);
-    }
-
-    const subcategories = selectedCategoryData.subcategories.map((subcat) => {
-      if (subcat.subcategoryImageFile) {
-        formData.append(
-          `subcategoryImage_${subcat.id}`,
-          subcat.subcategoryImageFile,
-        );
-      }
-      return {
-        subcategoryName: subcat.subcategoryName,
-        id: subcat.id,
-        isNew: subcat.isNew ? true : false,
-      };
-    });
-    formData.append("subcategories", JSON.stringify(subcategories));
-    console.log("დასააფდეითებელი დატა", {
-      subcategories,
-      selectedCategoryData,
-    });
+  // Handle form submission with proper change detection
+  const onSubmit = async (data: UpdateCategoryFormValues) => {
     try {
-      const response = await updateCategory(selectedCategoryId, formData);
-      toast.success(response.message);
-      handleToggleEditModal(); // Close on success
-    } catch (error) {
-      // Keep modal open on error so user can fix it
-      if (error instanceof AxiosError) {
-        const message =
-          error.response?.data?.message || "Failed to update category";
-        toast.error(message);
-        console.error("Failed to update category:", error);
-      } else {
-        toast.error("Something went wrong");
-        console.error(error);
+      // Build FormData only with changed fields
+      const formData = new FormData();
+
+      // Add category fields
+      formData.append("categoryName", data.categoryName);
+      formData.append("categoryNameKa", data.categoryNameKa);
+
+      // Only add image if it changed
+      if (data.categoryImage instanceof File) {
+        formData.append("categoryImage", data.categoryImage);
       }
+
+      // Process subcategories - differentiate between new and existing
+      const subcategories = data.subCategories.map((sub) => {
+        let id: string | number;
+        let isNew: boolean;
+        if (sub.id) {
+          id = sub.id;
+          isNew = false;
+        } else {
+          id = v4();
+          isNew = true;
+        }
+        const payload = {
+          id: id,
+          isNew: isNew,
+          subcategoryName: sub.subcategoryName,
+          subcategoryNameKa: sub.subcategoryNameKa,
+        };
+
+        // Handle subcategory images
+        if (sub.subcategoryImage instanceof File) {
+          // New image uploaded
+          formData.append(`subcategoryImage_${id}`, sub.subcategoryImage);
+        }
+
+        return payload;
+      });
+      console.log("დასააპდეითებელი დატა", {
+        subcategories,
+        categoryName: data.categoryName,
+        categoryNameKa: data.categoryNameKa,
+      });
+
+      formData.append("subcategories", JSON.stringify(subcategories));
+
+      // API call to update
+      const res = await updateCategory(categoryId, formData);
+      toast.success(res.message || "Category updated successfully");
+
+      // Reset form and close modal
+      reset();
+      handleToggleEditModal(undefined);
+
+      // Call parent callback to refresh data
+      onSuccess?.();
+    } catch (error) {
+      const message =
+        error instanceof AxiosError
+          ? error.response?.data?.message || "Failed to update category"
+          : "Failed to update category";
+      toast.error(message);
+      console.error("Update error:", error);
+    }
+  };
+
+  // Handle modal close with unsaved changes warning
+  const handleClose = () => {
+    if (isDirty) {
+      if (
+        confirm("You have unsaved changes. Are you sure you want to close?")
+      ) {
+        handleToggleEditModal(undefined);
+      }
+    } else {
+      handleToggleEditModal(undefined);
     }
   };
 
   return (
-    <Modal
-      className="space-y-4"
-      modalTitle="Edit Category"
-      onClose={() => handleToggleEditModal()}
-    >
-      <CategoryForm
-        actionName="edit"
-        handleDeleteSubcategory={handleDeleteSubcategory}
-        selectedCategoryData={selectedCategoryData}
-        onSubmit={onSubmit}
-        setSelectedCategoryData={setSelectedCategoryData}
-      />
+    <Modal modalTitle="Edit Category" onClose={handleClose}>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {error && !isLoadingData && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-sm text-red-700">{error}</p>
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              className="text-xs text-red-600 hover:text-red-800 mt-2"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
+        <UpdateCategoriesForm
+          control={control}
+          register={register}
+          errors={errors}
+          fields={fields}
+          append={append}
+          remove={remove}
+          existingImageUrl={categoryData?.imageUrl}
+          isLoading={isLoadingData}
+        />
+
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={handleClose}
+            className="flex-1 rounded-md border border-gray-300 py-2 text-gray-700 font-medium hover:bg-gray-50 disabled:opacity-50"
+            disabled={isSubmitting || isLoadingData}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting || isLoadingData || !isDirty}
+            className="flex-1 rounded-md bg-green-600 py-2 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-green-700"
+          >
+            {isSubmitting ? "Saving..." : "Update Category"}
+          </button>
+        </div>
+      </form>
     </Modal>
   );
 };

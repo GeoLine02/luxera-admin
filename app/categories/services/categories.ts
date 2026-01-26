@@ -17,8 +17,7 @@ export const fetchCategoryById = async (categoryId: number) => {
     const res = await api.get(`/categories/${categoryId}`);
 
     if (res.status === 200) {
-      const data = await res.data.data;
-      return data;
+      return res.data;
     }
   } catch (error) {
     console.log(error);

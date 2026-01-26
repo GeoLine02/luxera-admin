@@ -18,7 +18,7 @@ const CategoryCard = ({
   categoryImage,
 }: CategoryCardProps) => {
   return (
-    <div className="flex items-center justify-between w-full max-w-[49%] bg-medium-gray p-2 rounded-md">
+    <div className="flex items-center justify-between w-full max-w-full md:max-w-[49%] bg-medium-gray p-2 rounded-md">
       <div className="flex items-center gap-2">
         <div className="w-14 aspect-square rounded-md bg-gray-500">
           <img

@@ -1,107 +1,105 @@
 "use client";
 
 import Modal from "@/components/ui/Modal";
-import CategoryForm from "./CategoryForm";
-import {
-  CategoryWithSubcategoriesDTO,
-  SubCategoryTypeDTO,
-} from "@/types/categories";
-import { Dispatch, FormEvent, SetStateAction } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
+import { CreateCategoryFormValues } from "@/types/categories";
 import { createCategory } from "../services/categories";
+import { v4 } from "uuid";
 import toast from "react-hot-toast";
 import { AxiosError } from "axios";
-
-interface AddCategoryModalProps {
-  handleToggleCreateModal: (categoryId?: number) => void;
-  handleDeleteSubcategory: (categoryId: number) => void;
-  handleSelectCategoryData: (
-    categoryData: CategoryWithSubcategoriesDTO,
-  ) => void;
-  selectedCategoryData: CategoryWithSubcategoriesDTO;
-  selectedCategoryId: number | null;
-  setSelectedCategoryData: Dispatch<
-    SetStateAction<CategoryWithSubcategoriesDTO>
-  >;
+import CreateCategoriesForm from "./CreateCategoriesForm";
+interface CategoryCreateModalProps {
+  handleToggleCreateModal: () => void;
 }
 
 const CategoryCreateModal = ({
   handleToggleCreateModal,
-  handleDeleteSubcategory,
-  selectedCategoryData,
-  setSelectedCategoryData,
-}: AddCategoryModalProps) => {
-  const onCreate = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("category data: ", selectedCategoryData);
+}: CategoryCreateModalProps) => {
+  const {
+    control,
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<CreateCategoryFormValues>({
+    defaultValues: {
+      categoryName: "",
+      categoryNameKa: "",
+      categoryImage: null,
+      subCategories: [
+        {
+          subcategoryName: "",
+          subcategoryImage: null,
+          subcategoryNameKa: "",
+        },
+      ],
+    },
+  });
 
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "subCategories",
+  });
+
+  const onSubmit = async (data: CreateCategoryFormValues) => {
     try {
-      // Create FormData to handle file upload
       const formData = new FormData();
 
-      formData.append("categoryName", selectedCategoryData.categoryName);
+      formData.append("categoryName", data.categoryName);
+      formData.append("categoryNameKa", data.categoryNameKa);
+      if (data.categoryImage) {
+        formData.append("categoryImage", data.categoryImage);
+      }
+      const subcategories = data.subCategories.map((sub) => {
+        const tempId = v4();
 
-      // Add image file if it exists
-
-      if (!selectedCategoryData.categoryImageFile) return; // or raise validation error
-
-      formData.append("categoryImage", selectedCategoryData.categoryImageFile);
-
-      const subcategories = selectedCategoryData.subcategories.map(
-        (subcat: SubCategoryTypeDTO) => {
-          if (subcat.subcategoryImageFile)
-            formData.append(
-              `subcategoryImage_${subcat.id}`,
-              subcat.subcategoryImageFile,
-            );
-
-          return {
-            tempId: subcat.id,
-            subcategoryName: subcat.subcategoryName,
-          };
-        },
-      );
-
+        if (sub.subcategoryImage) {
+          formData.append(`subcategoryImage_${tempId}`, sub.subcategoryImage);
+        }
+        return {
+          tempId: tempId,
+          subcategoryName: sub.subcategoryName,
+          subcategoryNameKa: sub.subcategoryNameKa,
+        };
+      });
       formData.append("subcategories", JSON.stringify(subcategories));
 
-      const response = await createCategory(formData);
-      console.log("response", response);
+      // API call
+      const res = await createCategory(formData);
+      toast.success(res.message);
 
-      setSelectedCategoryData({
-        categoryName: "",
-        categoryImageUrl: "",
-        categoryImageFile: null,
-        subcategories: [],
-      });
-
-      // Close modal
-      toast.success("Category created successfully");
+      // Reset and close modal
+      reset();
       handleToggleCreateModal();
     } catch (error) {
       if (error instanceof AxiosError) {
-        if (error.response?.data.message) {
-          toast.error(error.response?.data.message);
-          return;
-        }
-        toast.error("Something went wrong");
-        console.error("Failed to create category:", error);
+        const message = error.response?.data.message;
+        toast.error(message);
       }
-
-      // You can add error handling UI here (toast, alert, etc.)
+      console.log(error);
     }
   };
 
   return (
-    <Modal
-      modalTitle="Create Category"
-      onClose={() => handleToggleCreateModal()}
-    >
-      <CategoryForm
-        setSelectedCategoryData={setSelectedCategoryData}
-        selectedCategoryData={selectedCategoryData}
-        handleDeleteSubcategory={handleDeleteSubcategory}
-        onSubmit={onCreate}
-        actionName="create"
-      />
+    <Modal modalTitle="Create Category" onClose={handleToggleCreateModal}>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <CreateCategoriesForm
+          control={control}
+          register={register}
+          errors={errors}
+          fields={fields}
+          append={append}
+          remove={remove}
+        />
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full rounded-md bg-green-600 py-2 text-white disabled:opacity-50"
+        >
+          Create Category
+        </button>
+      </form>
     </Modal>
   );
 };

@@ -10,5 +10,9 @@ const api = axios.create({
     : "/api",
   withCredentials: true,
 });
-
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+}
 export default api;

@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
         hostname: "localhost",
         port: "3000",
       },
+      {
+        protocol: "https",
+        hostname: "luxera-storage.hel1.your-objectstorage.com",
+      },
     ],
   },
 
