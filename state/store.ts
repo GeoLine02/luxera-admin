@@ -1,10 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch } from "react-redux";
 import userReducer from "./features/userSlice";
+import sideMenuReducer from "./features/sideMenuSlice";
 
 export const store = configureStore({
   reducer: {
     userReducer: userReducer,
+    sideMenuReducer: sideMenuReducer,
   },
 });
 

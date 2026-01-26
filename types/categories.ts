@@ -1,44 +1,27 @@
-// DTOS
-interface CategoryTypeDTO {
-  id?: number;
-  categoryName: string;
-  categoryImageFile?: File | null;
-  categoryImageUrl?: string;
-}
-
-interface SubCategoryTypeDTO {
-  id?: number;
-  subcategoryName: string;
-  categoryId?: number;
-  subcategoryImageFile?: File | null;
-  subcategoryImageUrl?: string;
-}
-
-interface CategoryWithSubcategoriesDTO extends CategoryTypeDTO {
-  subcategories: SubCategoryTypeDTO[];
-  deletedSubcategories?: number[];
-}
-// Server Response Data
-interface CategoryType {
+export interface CategoryType {
   id: number;
   category_name: string;
-  category_image: string;
-}
-interface SubCategoryType {
-  id: 13;
-  sub_category_name: string;
-  sub_category_image: string;
-  category_id: number;
-}
-interface CategoryDetailsType extends CategoryType {
-  subCategories: SubCategoryType[];
+  category_name_ka: string;
+  imageUrl: string;
 }
 
-export type {
-  CategoryTypeDTO,
-  SubCategoryTypeDTO,
-  CategoryWithSubcategoriesDTO,
-  CategoryDetailsType,
-  CategoryType,
-  SubCategoryType,
-};
+export interface CreateCategoryType {
+  id: number;
+  categoryName: string;
+  categoryImage: File;
+}
+
+export interface CreateSubcategoryType {
+  id: number;
+  subcategoryName: string;
+  subcategoryImage: File;
+}
+
+export interface CreateCategoryFormValues {
+  categoryName: string;
+  categoryImage: File | null; // ✅ SINGLE image
+  subCategories: {
+    subcategoryName: string;
+    subcategoryImage: File | null; // ✅ SINGLE image
+  }[];
+}

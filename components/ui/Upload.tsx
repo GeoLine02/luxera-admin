@@ -2,23 +2,13 @@
 
 import { Plus, X } from "lucide-react";
 import Image from "next/image";
-import { ChangeEvent, useEffect, useEffectEvent, useRef } from "react";
-import { urlToFile } from "@/utils/urlToFile";
+import { ChangeEvent, useRef } from "react";
 
 interface UploadProps {
-  /** URLs coming from API */
-  fileUrls: string | string[];
-
-  /** Already selected files (including converted URLs) */
+  fileUrls?: string | string[];
   files: File[];
-
-  /** Allow multiple file selection */
   multiSelect?: boolean;
-
-  /** Called when files OR urls change */
   onChange: (files: File[]) => void;
-
-  /** Called when API image url is removed */
   onRemoveUrl?: (url: string) => void;
 }
 
@@ -31,64 +21,35 @@ const Upload = ({
 }: UploadProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  /** Normalize URLs (string | string[] → string[]) */
-  const normalizedUrls: string[] = Array.isArray(fileUrls)
+  /** Normalize URLs */
+  const normalizedUrls = Array.isArray(fileUrls)
     ? fileUrls
     : fileUrls
-    ? [fileUrls]
-    : [];
+      ? [fileUrls]
+      : [];
 
-  /**
-   * Convert API image URLs → File objects
-   * Runs once on mount
-   */
-  const onUrlConvertToFile = useEffectEvent(() => {
-    async function convertUrls() {
-      if (!normalizedUrls.length) return;
-
-      const urlFiles = await Promise.all(
-        normalizedUrls.map((url) => urlToFile(url, "image"))
-      );
-
-      // Merge URL files with existing new files
-      onChange([...urlFiles, ...files]);
-    }
-
-    convertUrls();
-  });
-
-  useEffect(() => {
-    onUrlConvertToFile();
-  }, []);
-
-  /** Handle new file upload */
+  /** Handle file select */
   function handleFileSelect(e: ChangeEvent<HTMLInputElement>) {
     if (!e.target.files) return;
 
     const selected = Array.from(e.target.files);
+    const updatedFiles = multiSelect ? [...files, ...selected] : [selected[0]];
 
-    const newFiles = multiSelect ? [...files, ...selected] : [selected[0]];
-
-    onChange(newFiles);
+    onChange(updatedFiles);
 
     if (inputRef.current) inputRef.current.value = "";
   }
 
-  /** Remove a file (converted or new) */
+  /** Remove selected file */
   function handleRemoveFile(index: number) {
     const updated = [...files];
     updated.splice(index, 1);
     onChange(updated);
   }
 
-  /** Remove API URL BEFORE it's converted to File */
-  function handleRemoveUrl(url: string) {
-    if (onRemoveUrl) onRemoveUrl(url);
-  }
-
   return (
     <div className="flex gap-3 flex-wrap">
-      {/* Show incoming API URLs FIRST */}
+      {/* API image URLs */}
       {normalizedUrls.map((url) => (
         <div
           key={url}
@@ -96,23 +57,25 @@ const Upload = ({
         >
           <Image src={url} fill alt="" className="object-cover" />
 
-          <button
-            type="button"
-            onClick={() => handleRemoveUrl(url)}
-            className="absolute top-1 right-1 bg-black/60 rounded-full p-1"
-          >
-            <X className="h-4 w-4 text-white" />
-          </button>
+          {onRemoveUrl && (
+            <button
+              type="button"
+              onClick={() => onRemoveUrl(url)}
+              className="absolute top-1 right-1 bg-black/60 rounded-full p-1"
+            >
+              <X className="h-4 w-4 text-white" />
+            </button>
+          )}
         </div>
       ))}
 
-      {/* Show converted + user-selected files */}
+      {/* Selected files */}
       {files.map((file, index) => {
         const preview = URL.createObjectURL(file);
 
         return (
           <div
-            key={file.name + index}
+            key={file.name + file.lastModified}
             className="relative w-40 aspect-square rounded-xl overflow-hidden border"
           >
             <Image src={preview} fill alt="" className="object-cover" />
@@ -128,17 +91,15 @@ const Upload = ({
         );
       })}
 
-      {/* ===================== */}
-      {/* SHOW UPLOAD BOX ONLY IF ALLOWED */}
-      {/* ===================== */}
-
+      {/* Upload box */}
       {!(!multiSelect && (normalizedUrls.length > 0 || files.length > 0)) && (
-        <label className="w-40 aspect-square rounded-2xl border-2 border-dashed flex items-center justify-center cursor-pointer select-none hover:bg-gray-50 transition">
+        <label className="w-40 aspect-square rounded-2xl border-2 border-dashed flex items-center justify-center cursor-pointer hover:bg-gray-50 transition">
           <input
             ref={inputRef}
             type="file"
             className="hidden"
             multiple={multiSelect}
+            accept="image/*"
             onChange={handleFileSelect}
           />
 

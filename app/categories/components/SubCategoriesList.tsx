@@ -1,7 +1,6 @@
 "use client";
 
 import { SubCategoryTypeDTO } from "@/types/categories";
-import { X } from "lucide-react";
 import SubCategoryCard from "./SubcategoryCard";
 
 interface SubCategoriesListProps {

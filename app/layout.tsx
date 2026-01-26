@@ -6,6 +6,7 @@ import SideMenu from "@/components/shared/SideMenu";
 import { Poppins } from "next/font/google";
 import ReduxProvider from "@/providers/ReduxProvider";
 import { Toaster } from "react-hot-toast";
+import MobileHeader from "@/components/shared/MobileHeader";
 
 export const metadata: Metadata = {
   title: "Luxera Admin",
@@ -33,7 +34,10 @@ export default async function RootLayout({
           <UserProvider userData={userData?.user}>
             <div className="w-full flex h-full">
               <SideMenu />
-              <main className="w-full">{children}</main>
+              <div className="w-full">
+                <MobileHeader />
+                <main className="w-full">{children}</main>
+              </div>
             </div>
           </UserProvider>
         </ReduxProvider>

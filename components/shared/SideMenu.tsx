@@ -1,8 +1,12 @@
 "use client";
 
+import { toggleMenu } from "@/state/features/sideMenuSlice";
+import { AppDispatch, RootState } from "@/state/store";
+import { X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 const routesData = [
   {
@@ -52,14 +56,25 @@ const routesData = [
 const SideMenu = () => {
   const pathname = usePathname();
   const [openSection, setOpenSection] = useState<string | null>(null);
-
+  const dispatch = useDispatch<AppDispatch>();
   const toggleSection = (key: string) => {
     setOpenSection((prev) => (prev === key ? null : key));
   };
 
+  const handleToggleMenu = () => {
+    dispatch(toggleMenu());
+  };
+  const { isMenuOpen } = useSelector(
+    (state: RootState) => state.sideMenuReducer,
+  );
   return (
-    <aside className="w-full max-w-[300px] bg-medium-gray/70 flex flex-col items-center min-h-screen px-2 py-4">
-      <h1 className="text-3xl font-bold text-white">Luxera Admin</h1>
+    <aside
+      className={`${isMenuOpen ? "left-0" : "-left-80"} w-full max-w-[300px] bg-medium-gray flex flex-col items-center min-h-screen px-2 py-4 fixed top-0 z-50 transition-all duration-200 ease-in-out`}
+    >
+      <div className="flex items-center justify-between w-full">
+        <h1 className="text-3xl font-bold text-white">Luxera Admin</h1>
+        <X onClick={handleToggleMenu} color="white" />
+      </div>
 
       <div className="w-full flex flex-col gap-2 mt-11">
         {routesData.map((route) => {
