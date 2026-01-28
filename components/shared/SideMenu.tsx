@@ -69,11 +69,11 @@ const SideMenu = () => {
   );
   return (
     <aside
-      className={`${isMenuOpen ? "left-0" : "-left-80"} w-full max-w-[300px] bg-medium-gray flex flex-col items-center min-h-screen px-2 py-4 fixed top-0 z-50 transition-all duration-200 ease-in-out`}
+      className={`${isMenuOpen ? "left-0" : "-left-80"} w-full max-w-[300px] bg-medium-gray flex flex-col items-center min-h-screen px-2 py-4 fixed md:static top-0 z-50 transition-all duration-200 ease-in-out`}
     >
       <div className="flex items-center justify-between w-full">
         <h1 className="text-3xl font-bold text-white">Luxera Admin</h1>
-        <X onClick={handleToggleMenu} color="white" />
+        <X className="md:hidden" onClick={handleToggleMenu} color="white" />
       </div>
 
       <div className="w-full flex flex-col gap-2 mt-11">

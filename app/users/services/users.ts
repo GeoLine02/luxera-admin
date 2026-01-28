@@ -8,6 +8,7 @@ export const fetchUsersData = async () => {
       return res.data.message;
     }
     const data = res.data;
+    console.log(data);
     return data;
   } catch (error) {
     console.log(error);

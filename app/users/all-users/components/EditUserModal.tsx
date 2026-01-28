@@ -12,13 +12,13 @@ import {
 } from "@/state/features/userSlice";
 import { AppDispatch, RootState } from "@/state/store";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchUserById, updateUserById } from "../services/users";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { ClipLoader } from "react-spinners";
+import { fetchUserById, updateUserById } from "../../services/users";
 
 const EditUserModal = () => {
   const { selectedUserId, selectedUserData, usersData } = useSelector(
-    (state: RootState) => state.userReducer
+    (state: RootState) => state.userReducer,
   );
   const [userFields, setUserFields] = useState({
     id: selectedUserData?.id,
@@ -82,7 +82,7 @@ const EditUserModal = () => {
       const res = await updateUserById(payload);
       if (res.success) {
         const updatedUsers = usersData.map((user) =>
-          user.id === res.data.id ? res.data : user
+          user.id === res.data.id ? res.data : user,
         );
         dispatch(saveUsersData(updatedUsers));
         onModalClose();
