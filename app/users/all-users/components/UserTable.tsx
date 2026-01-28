@@ -1,9 +1,6 @@
 "use client";
 
-import Table from "@/components/shared/Table";
-import { Column } from "@/types/table";
 import { UserType } from "@/types/user";
-import { deleteUserService, updateUserById } from "../services/users";
 import Dropdown from "@/components/ui/DropDown";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/state/store";
@@ -13,7 +10,10 @@ import {
   toggleUserEditModal,
 } from "@/state/features/userSlice";
 import EditUserModal from "./EditUserModal";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { deleteUserService, updateUserById } from "../../services/users";
+import TableComponent, { Column } from "@/components/shared/Table";
+import { EllipsisVertical } from "lucide-react";
 
 interface UserRoleProps {
   role: string;
@@ -54,6 +54,28 @@ const UserRole = ({ role, userId, onUpadteRole }: UserRoleProps) => {
   );
 };
 
+interface ActionsProps {
+  row: UserType;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onDelete: (row: UserType) => Promise<any>;
+  onEdit: (row: UserType) => void;
+}
+
+const Actions = ({ onDelete, onEdit, row }: ActionsProps) => {
+  return (
+    <Dropdown>
+      <Dropdown.Trigger>
+        <EllipsisVertical color="black" />
+      </Dropdown.Trigger>
+      <Dropdown.Menu>
+        <Dropdown.Item>View</Dropdown.Item>
+        <Dropdown.Item onClick={() => onEdit(row)}>Edit</Dropdown.Item>
+        <Dropdown.Item onClick={() => onDelete(row)}>Delete</Dropdown.Item>
+      </Dropdown.Menu>
+    </Dropdown>
+  );
+};
+
 interface UserTableProps {
   userData: UserType[];
 }
@@ -61,36 +83,39 @@ interface UserTableProps {
 const UserTable = ({ userData: users }: UserTableProps) => {
   const COLUMNS: Column<UserType>[] = [
     {
-      header: "id",
-      accessor: "id",
+      id: "id",
+      label: "ID",
     },
     {
-      header: "Full Name",
-      accessor: "full_name",
+      id: "full_name",
+      label: "Full Name",
     },
     {
-      header: "Email",
-      accessor: "email",
+      id: "email",
+      label: "Email",
     },
     {
-      header: "Role",
-      accessor: "role",
-      render: (value, row) => {
-        return (
-          <UserRole
-            userId={row.id}
-            onUpadteRole={onUpdateRole}
-            role={value as string}
-          />
-        );
-      },
+      id: "role",
+      label: "Role",
+      render: (value, row) => (
+        <UserRole
+          userId={row.id}
+          onUpadteRole={onUpdateRole}
+          role={value as string}
+        />
+      ),
     },
   ];
 
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
   const dispatch = useDispatch<AppDispatch>();
   const { isUserEditModalOpen, usersData } = useSelector(
-    (state: RootState) => state.userReducer
+    (state: RootState) => state.userReducer,
   );
+
+  console.log(usersData);
 
   useEffect(() => {
     dispatch(saveUsersData(users));
@@ -101,10 +126,21 @@ const UserTable = ({ userData: users }: UserTableProps) => {
     return res.data;
   };
 
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   const onEdit = (row: UserType) => {
     const userId = row.id;
     dispatch(selectUserId(userId));
     dispatch(toggleUserEditModal());
+  };
+
+  const handleChangePage = (_: unknown, newPage: number) => {
+    setPage(newPage);
   };
 
   const onUpdateRole = async (userId: number, role: string) => {
@@ -113,7 +149,7 @@ const UserTable = ({ userData: users }: UserTableProps) => {
       console.log("res: ", res);
       if (res.success) {
         const updatedUser = usersData.map((user) =>
-          user.id === userId ? { ...user, role } : user
+          user.id === userId ? { ...user, role } : user,
         );
         dispatch(saveUsersData(updatedUser));
       }
@@ -124,11 +160,17 @@ const UserTable = ({ userData: users }: UserTableProps) => {
 
   return (
     <>
-      <Table
-        onDelete={onDelete}
-        data={usersData}
+      <TableComponent
         columns={COLUMNS}
-        onEdit={onEdit}
+        handleChangePage={handleChangePage}
+        handleChangeRowsPerPage={handleChangeRowsPerPage}
+        page={page}
+        rows={usersData}
+        rowsPerPage={rowsPerPage}
+        rowKey="id"
+        actions={(row) => (
+          <Actions row={row} onDelete={onDelete} onEdit={onEdit} />
+        )}
       />
       {isUserEditModalOpen && <EditUserModal />}
     </>
