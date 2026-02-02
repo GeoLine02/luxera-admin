@@ -40,7 +40,9 @@ const PendingProductsTable = ({
   pendingProducts,
   page,
 }: PendingProductsTableProps) => {
-  const rows = pendingProducts.map((p) => ({
+  const [products, setProducts] = useState(pendingProducts);
+
+  const rows = products.map((p) => ({
     id: p.id,
     primary_variant_image:
       p.primaryVariant.images?.[0]?.imageUrl || "/placeholder.png",
@@ -118,6 +120,7 @@ const PendingProductsTable = ({
       />
       {isDeleteModalOpen && (
         <DeleteProductModal
+          products={products}
           selectedProductId={Number(selectedProductId)}
           onCloseDeleteModal={onCloseDeleteModal}
         />
