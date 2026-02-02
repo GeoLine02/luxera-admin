@@ -12,22 +12,30 @@ export interface ProductType {
   sales_per_month: number;
 }
 
+export interface ProductImage {
+  id: number;
+  imageUrl: string;
+}
+
 export interface ProductVariantType {
   id: number;
   variant_name: string;
+  images: ProductImage[];
   product_id: number;
   variant_price: number;
-  variant_qunatity: number;
+  variant_quantity: number;
   variant_discount: number;
-}
-
-export interface ProductImage {
-  id: number;
-  image: string;
-  product_id: number;
-  variant_id: number;
 }
 
 export interface ProductWithPrimaryVariantType extends ProductType {
   primaryVariant: ProductVariantType;
 }
+
+export type ProductRow = {
+  id: number;
+  primaryVariant: ProductVariantType;
+  shop_id: number;
+  product_status: string;
+  variant_price: number;
+  variant_quantity: number;
+};

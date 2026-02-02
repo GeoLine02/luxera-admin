@@ -14,13 +14,13 @@ import TableRow from "@mui/material/TableRow";
 /* Column type                         */
 /* ---------------------------------- */
 
-export interface Column<T> {
-  id: keyof T;
+export interface Column<T, K extends keyof T = keyof T> {
+  id: K;
   label: string;
   minWidth?: number;
   align?: "left" | "right" | "center";
   format?: (value: number) => string;
-  render?: (value: T[keyof T], row: T) => React.ReactNode;
+  render?: (value: T[K], row: T) => React.ReactNode;
 }
 
 /* ---------------------------------- */

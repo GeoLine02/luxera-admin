@@ -41,6 +41,11 @@ const routesData = [
         label: "Create Product",
         href: "/products/create-product",
       },
+      {
+        key: "pending-products",
+        label: "Pending Products",
+        href: "/products/pending-products",
+      },
     ],
   },
   {
