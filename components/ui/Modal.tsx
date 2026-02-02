@@ -18,11 +18,11 @@ const Modal = ({ onClose, modalTitle, children, className }: ModalProps) => {
         transition={{ duration: 0.4 }}
         className={cn(
           className,
-          "bg-medium-gray rounded-xl w-full max-w-lg overflow-hidden",
+          "bg-medium-gray rounded-xl w-full  overflow-hidden",
         )}
       >
         {/* HEADER */}
-        <div className="flex justify-between items-center p-4 border-b border-white/20">
+        <div className="flex justify-between items-center p-4 border-b border-white/20 w-full">
           <h1 className="text-2xl font-semibold">{modalTitle}</h1>
           <X
             className="cursor-pointer"

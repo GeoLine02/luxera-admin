@@ -9,3 +9,12 @@ export const deleteProduct = async (productId: number) => {
     console.log(error);
   }
 };
+
+export const fetchProductById = async (productId: number) => {
+  try {
+    const res = await api.get(`/products/${productId}`);
+    return res.data.data;
+  } catch (error) {
+    console.log(error);
+  }
+};

@@ -16,3 +16,23 @@ export const fetchPendingProducts = async (page: number) => {
     console.log(error);
   }
 };
+
+export const approveProduct = async (productId: number) => {
+  try {
+    const res = await api.patch(`/products/approveProduct/${productId}`);
+
+    return res.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const rejectProduct = async (productId: number) => {
+  try {
+    const res = await api.patch(`/products/rejectProduct/${productId}`);
+
+    return res.data;
+  } catch (error) {
+    console.log(error);
+  }
+};

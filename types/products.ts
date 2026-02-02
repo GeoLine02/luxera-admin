@@ -4,12 +4,14 @@ export interface ProductType {
   product_status: string;
   product_owner_id: number;
   product_sub_category_id: number;
+  product_description: string;
   shop_id: number;
   primary_variant_id: number;
   views_per_day: number;
   views_per_month: number;
   sales_per_day: number;
   sales_per_month: number;
+  variants: ProductVariantType[];
 }
 
 export interface ProductImage {

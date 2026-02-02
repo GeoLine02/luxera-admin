@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
-import { deleteProduct } from "../../services/products";
+import { deleteProduct } from "../services/products";
 import { ProductRow } from "@/types/products";
 
 interface DeleteProductModalProps {
