@@ -6,7 +6,8 @@ import { ProductRow } from "@/types/products";
 import { EllipsisVertical } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import DeleteProductModal from "./DeleteProductModal";
+import DeleteProductModal from "../../components/DeleteProductModal";
+import ViewProductModal from "../../components/ViewProductModal";
 
 interface PendingProductsTableProps {
   pendingProducts: ProductRow[];
@@ -18,18 +19,17 @@ interface PendingProductsTableProps {
 interface ActionsProps {
   row: ProductRow;
   onDelete: (row: ProductRow) => void;
-  onEdit: (row: ProductRow) => void;
+  onView: (row: ProductRow) => void;
 }
 
-const Actions = ({ onDelete, onEdit, row }: ActionsProps) => {
+const Actions = ({ onDelete, onView, row }: ActionsProps) => {
   return (
     <Dropdown>
       <Dropdown.Trigger>
         <EllipsisVertical color="black" />
       </Dropdown.Trigger>
       <Dropdown.Menu>
-        <Dropdown.Item>View</Dropdown.Item>
-        <Dropdown.Item onClick={() => onEdit(row)}>Edit</Dropdown.Item>
+        <Dropdown.Item onClick={() => onView(row)}>View</Dropdown.Item>
         <Dropdown.Item onClick={() => onDelete(row)}>Delete</Dropdown.Item>
       </Dropdown.Menu>
     </Dropdown>
@@ -91,6 +91,7 @@ const PendingProductsTable = ({
     null,
   );
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   const onOpenDeleteModal = (row: ProductRow) => {
     setSelectedProductId(row.id);
@@ -102,7 +103,15 @@ const PendingProductsTable = ({
     setSelectedProductId(null);
   };
 
-  const onEdit = () => {};
+  const onOpenViewModal = (row: ProductRow) => {
+    setSelectedProductId(row.id);
+    setIsViewModalOpen(true);
+  };
+
+  const onCloseViewModal = () => {
+    setIsViewModalOpen(false);
+    setSelectedProductId(null);
+  };
 
   return (
     <div>
@@ -115,7 +124,11 @@ const PendingProductsTable = ({
         rows={rows}
         rowsPerPage={10}
         actions={(row) => (
-          <Actions row={row.raw} onDelete={onOpenDeleteModal} onEdit={onEdit} />
+          <Actions
+            row={row.raw}
+            onDelete={onOpenDeleteModal}
+            onView={onOpenViewModal}
+          />
         )}
       />
       {isDeleteModalOpen && (
@@ -123,6 +136,12 @@ const PendingProductsTable = ({
           products={products}
           selectedProductId={Number(selectedProductId)}
           onCloseDeleteModal={onCloseDeleteModal}
+        />
+      )}
+      {isViewModalOpen && (
+        <ViewProductModal
+          productId={Number(selectedProductId)}
+          onClose={onCloseViewModal}
         />
       )}
     </div>
