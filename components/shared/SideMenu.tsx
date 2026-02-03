@@ -32,14 +32,9 @@ const routesData = [
     href: "/products",
     children: [
       {
-        key: "all-products",
-        label: "All Products",
-        href: "/products/all-products",
-      },
-      {
-        key: "create-product",
-        label: "Create Product",
-        href: "/products/create-product",
+        key: "active-products",
+        label: "Active Products",
+        href: "/products/active-products",
       },
       {
         key: "pending-products",

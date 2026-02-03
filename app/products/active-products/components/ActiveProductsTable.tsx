@@ -4,22 +4,27 @@ import TableComponent, { Column } from "@/components/shared/Table";
 import { ProductRow } from "@/types/products";
 import Image from "next/image";
 import { useState } from "react";
+import ProductActions from "../../components/ProductActions";
 import DeleteProductModal from "../../components/DeleteProductModal";
 import ViewProductModal from "../../components/ViewProductModal";
-import ProductActions from "../../components/ProductActions";
 
-interface PendingProductsTableProps {
-  pendingProducts: ProductRow[];
-  page: number;
-  pageSize: number;
-  hasMore: boolean;
+interface ActiveProductsTableProps {
+  activeProducts: ProductRow[];
+  initialPage: number;
 }
 
-const PendingProductsTable = ({
-  pendingProducts,
-  page,
-}: PendingProductsTableProps) => {
-  const [products, setProducts] = useState(pendingProducts);
+const ActiveProductsTable = ({
+  activeProducts,
+  initialPage,
+}: ActiveProductsTableProps) => {
+  const [products, setProducts] = useState(activeProducts);
+  const [page, setPage] = useState(initialPage);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(
+    null,
+  );
 
   const rows = products.map((p) => ({
     id: p.id,
@@ -66,12 +71,6 @@ const PendingProductsTable = ({
     { id: "variant_quantity", label: "Quantity", align: "right" },
   ];
 
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(
-    null,
-  );
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-
   const onOpenDeleteModal = (row: ProductRow) => {
     setSelectedProductId(row.id);
     setIsDeleteModalOpen(true);
@@ -92,16 +91,24 @@ const PendingProductsTable = ({
     setSelectedProductId(null);
   };
 
+  const handleChangeRowsPerPage = (newRowsPerPage: number) => {
+    setRowsPerPage(newRowsPerPage);
+  };
+
+  const handleChangPage = (newPage: number) => {
+    setPage(newPage);
+  };
+
   return (
     <div>
       <TableComponent
         columns={columns}
         handleChangePage={() => {}}
         handleChangeRowsPerPage={() => {}}
-        page={page - 1}
+        page={page}
         rowKey={"id"}
         rows={rows}
-        rowsPerPage={10}
+        rowsPerPage={rowsPerPage}
         actions={(row) => (
           <ProductActions
             row={row.raw}
@@ -128,4 +135,4 @@ const PendingProductsTable = ({
   );
 };
 
-export default PendingProductsTable;
+export default ActiveProductsTable;
