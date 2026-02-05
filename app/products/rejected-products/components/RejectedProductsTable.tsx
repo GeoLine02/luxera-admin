@@ -7,6 +7,7 @@ import { useState } from "react";
 import ProductActions from "../../components/ProductActions";
 import DeleteProductModal from "../../components/DeleteProductModal";
 import ViewProductModal from "../../components/ViewProductModal";
+import { refetchRejectedProducts } from "../services/rejectedProducts.client";
 
 interface RejectedProductsTableProps {
   rejectedProducts: ProductRow[];
@@ -91,8 +92,14 @@ const RejectedProductsTable = ({
     setSelectedProductId(null);
   };
 
-  const handleChangePage = (_: unknown, newPage: number) => {
-    setPage(newPage + 1); // because your state is 1-based
+  const handleChangePage = async (_: unknown, newPage: number) => {
+    try {
+      setPage(newPage + 1);
+      const res = await refetchRejectedProducts(page);
+      setProducts(res.data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleChangeRowsPerPage = (

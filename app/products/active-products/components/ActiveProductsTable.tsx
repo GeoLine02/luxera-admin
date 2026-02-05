@@ -7,6 +7,7 @@ import { useState } from "react";
 import ProductActions from "../../components/ProductActions";
 import DeleteProductModal from "../../components/DeleteProductModal";
 import ViewProductModal from "../../components/ViewProductModal";
+import { refetchActiveProducts } from "../services/activeProducts.client";
 
 interface ActiveProductsTableProps {
   activeProducts: ProductRow[];
@@ -91,8 +92,10 @@ const ActiveProductsTable = ({
     setSelectedProductId(null);
   };
 
-  const handleChangePage = (_: unknown, newPage: number) => {
+  const handleChangePage = async (_: unknown, newPage: number) => {
     setPage(newPage + 1); // because your state is 1-based
+    const res = await refetchActiveProducts(page);
+    setProducts(res.data);
   };
 
   const handleChangeRowsPerPage = (
