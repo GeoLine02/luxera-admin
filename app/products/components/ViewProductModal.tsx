@@ -1,13 +1,14 @@
 import { ProductRow, ProductType, ProductVariantType } from "@/types/products";
 import Image from "next/image";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { fetchProductById } from "../services/products";
-import { Check, X } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 import {
   approveProduct,
+  fetchProductById,
   rejectProduct,
-} from "../pending-products/services/pendingProduct.client";
+} from "../services/products";
+import { Check, X } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+
 import ProductRejectMesssage from "./ProductRejectMesssage";
 
 interface ViewProductModalProps {

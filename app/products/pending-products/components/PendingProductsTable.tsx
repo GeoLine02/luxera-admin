@@ -7,6 +7,7 @@ import { useState } from "react";
 import DeleteProductModal from "../../components/DeleteProductModal";
 import ViewProductModal from "../../components/ViewProductModal";
 import ProductActions from "../../components/ProductActions";
+import { refetchPendingProducts } from "../services/pendingProduct.client";
 
 interface PendingProductsTableProps {
   pendingProducts: ProductRow[];
@@ -94,8 +95,14 @@ const PendingProductsTable = ({
     setSelectedProductId(null);
   };
 
-  const handleChangePage = (_: unknown, newPage: number) => {
-    setPage(newPage + 1); // because your state is 1-based
+  const handleChangePage = async (_: unknown, newPage: number) => {
+    try {
+      setPage(newPage + 1);
+      const res = await refetchPendingProducts(page);
+      setProducts(res.data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleChangeRowsPerPage = (
