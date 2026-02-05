@@ -10,10 +10,6 @@ import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 
-/* ---------------------------------- */
-/* Column type                         */
-/* ---------------------------------- */
-
 export interface Column<T, K extends keyof T = keyof T> {
   id: K;
   label: string;
@@ -22,10 +18,6 @@ export interface Column<T, K extends keyof T = keyof T> {
   format?: (value: number) => string;
   render?: (value: T[K], row: T) => React.ReactNode;
 }
-
-/* ---------------------------------- */
-/* Props                               */
-/* ---------------------------------- */
 
 interface TableComponentProps<T> {
   columns: Column<T>[];
@@ -37,10 +29,6 @@ interface TableComponentProps<T> {
   handleChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
   actions?: (row: T) => React.ReactNode;
 }
-
-/* ---------------------------------- */
-/* Component                           */
-/* ---------------------------------- */
 
 const TableComponent = <T,>({
   columns,

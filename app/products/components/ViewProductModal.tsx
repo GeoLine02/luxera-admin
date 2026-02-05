@@ -1,39 +1,91 @@
-import { ProductType, ProductVariantType } from "@/types/products";
+import { ProductRow, ProductType, ProductVariantType } from "@/types/products";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { fetchProductById } from "../services/products";
 import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import {
+  approveProduct,
+  rejectProduct,
+} from "../pending-products/services/pendingProduct.client";
+import ProductRejectMesssage from "./ProductRejectMesssage";
 
 interface ViewProductModalProps {
   productId: number;
   onClose: () => void;
+  setProducts: Dispatch<SetStateAction<ProductRow[]>>;
 }
 
-const ViewProductModal = ({ productId, onClose }: ViewProductModalProps) => {
+const ViewProductModal = ({
+  productId,
+  onClose,
+  setProducts,
+}: ViewProductModalProps) => {
   const [product, setProduct] = useState<ProductType | null>(null);
+  const [showRejectBox, setShowRejectBox] = useState(false);
+  const [rejectMessage, setRejectMessage] = useState("");
 
   useEffect(() => {
     const handleFetchProduct = async () => {
       const res = await fetchProductById(productId);
-
       setProduct(res);
     };
+
     handleFetchProduct();
   }, [productId]);
 
-  console.log(product);
+  const handleRejectProduct = async () => {
+    if (!rejectMessage.trim()) {
+      alert("Please provide a rejection message");
+      return;
+    }
+
+    try {
+      const res = await rejectProduct(
+        productId,
+        product?.shop_id as number,
+        rejectMessage,
+        product?.product_owner_id as number,
+      );
+      if (res.success) {
+        setProducts((prevProducts) =>
+          prevProducts.map((product) =>
+            product.id === productId
+              ? { ...product, product_status: "Rejected" } // mark rejected
+              : product,
+          ),
+        );
+      }
+
+      onClose();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleApproveProduct = async () => {
+    try {
+      const res = await approveProduct(
+        productId,
+        product?.shop_id as number,
+        product?.product_owner_id as number,
+      );
+
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 bg-opacity-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
       <div className="bg-white w-full max-w-4xl rounded-lg p-6 relative overflow-y-auto max-h-[90vh]">
-        {/* Close Button */}
-
+        {/* Header */}
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-black">View Product</h1>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-800 text-lg font-bold"
+            className="text-gray-500 hover:text-gray-800"
           >
             <X size={25} />
           </button>
@@ -54,6 +106,7 @@ const ViewProductModal = ({ productId, onClose }: ViewProductModalProps) => {
           <h3 className="font-medium text-lg mb-3 text-black">
             Product Variants
           </h3>
+
           {product?.variants.map((variant: ProductVariantType) => (
             <div
               key={variant.id}
@@ -67,6 +120,7 @@ const ViewProductModal = ({ productId, onClose }: ViewProductModalProps) => {
                   {variant.variant_name}
                 </p>
               </div>
+
               <div className="grid grid-cols-3 gap-4 mb-2">
                 <div>
                   <label className="block font-medium text-gray-700">
@@ -99,6 +153,7 @@ const ViewProductModal = ({ productId, onClose }: ViewProductModalProps) => {
                 <label className="block font-medium text-gray-700 mb-2">
                   Variant Images
                 </label>
+
                 <div className="flex gap-2 flex-wrap">
                   {variant.images.length > 0 ? (
                     variant.images.map((img, idx) => (
@@ -109,9 +164,9 @@ const ViewProductModal = ({ productId, onClose }: ViewProductModalProps) => {
                         <Image
                           src={img.imageUrl}
                           alt={variant.variant_name}
-                          className="object-cover"
                           width={200}
                           height={200}
+                          className="object-cover"
                         />
                       </div>
                     ))
@@ -124,16 +179,41 @@ const ViewProductModal = ({ productId, onClose }: ViewProductModalProps) => {
           ))}
         </div>
 
-        {/* Close Button */}
-        <div className="flex gap-4 justify-end mt-4">
-          <Button className="bg-green-500 text-white px-6 py-2 rounded-md flex gap-2 items-center hover:bg-green-700">
+        {/* Reject Message */}
+        {showRejectBox && (
+          <ProductRejectMesssage
+            rejectMessage={rejectMessage}
+            setRejectMessage={setRejectMessage}
+          />
+        )}
+
+        {/* Actions */}
+        <div className="flex gap-4 justify-end mt-6">
+          <Button
+            onClick={handleApproveProduct}
+            className="bg-green-500 text-white px-6 py-2 rounded-md flex gap-2 items-center hover:bg-green-700"
+          >
             <Check />
             Approve
           </Button>
-          <Button className="bg-red-500 text-white px-6 flex gap-2 items-center py-2 rounded-md hover:bg-red-700">
-            <X />
-            Reject
-          </Button>
+
+          {!showRejectBox ? (
+            <Button
+              onClick={() => setShowRejectBox(true)}
+              className="bg-red-500 text-white px-6 py-2 rounded-md flex gap-2 items-center hover:bg-red-700"
+            >
+              <X />
+              Reject
+            </Button>
+          ) : (
+            <Button
+              onClick={handleRejectProduct}
+              className="bg-red-600 text-white px-6 py-2 rounded-md flex gap-2 items-center hover:bg-red-800"
+            >
+              <X />
+              Confirm Reject
+            </Button>
+          )}
         </div>
       </div>
     </div>
