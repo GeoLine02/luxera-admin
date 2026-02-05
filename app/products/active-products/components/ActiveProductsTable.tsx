@@ -105,7 +105,7 @@ const ActiveProductsTable = ({
         columns={columns}
         handleChangePage={() => {}}
         handleChangeRowsPerPage={() => {}}
-        page={page}
+        page={page - 1}
         rowKey={"id"}
         rows={rows}
         rowsPerPage={rowsPerPage}
