@@ -8,7 +8,7 @@ const PendingProducts = async () => {
       <PendingProductsTable
         pendingProducts={pendingProducts.data}
         hasMore={pendingProducts.hasMore}
-        page={pendingProducts.page}
+        initialPage={pendingProducts.page}
         pageSize={pendingProducts.pageSize}
       />
     </div>

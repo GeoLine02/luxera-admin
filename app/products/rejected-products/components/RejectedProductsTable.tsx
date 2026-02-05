@@ -8,16 +8,16 @@ import ProductActions from "../../components/ProductActions";
 import DeleteProductModal from "../../components/DeleteProductModal";
 import ViewProductModal from "../../components/ViewProductModal";
 
-interface ActiveProductsTableProps {
-  activeProducts: ProductRow[];
+interface RejectedProductsTableProps {
+  rejectedProducts: ProductRow[];
   initialPage: number;
 }
 
-const ActiveProductsTable = ({
-  activeProducts,
+const RejectedProductsTable = ({
+  rejectedProducts,
   initialPage,
-}: ActiveProductsTableProps) => {
-  const [products, setProducts] = useState(activeProducts);
+}: RejectedProductsTableProps) => {
+  const [products, setProducts] = useState(rejectedProducts);
   const [page, setPage] = useState(initialPage);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -57,7 +57,7 @@ const ActiveProductsTable = ({
       id: "product_status",
       label: "Status",
       render: (status) => (
-        <span className="px-2 py-1 rounded bg-green-200 text-green-500">
+        <span className="px-2 py-1 rounded bg-red-200 font-medium text-red-500">
           {status as string}
         </span>
       ),
@@ -139,4 +139,4 @@ const ActiveProductsTable = ({
   );
 };
 
-export default ActiveProductsTable;
+export default RejectedProductsTable;

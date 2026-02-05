@@ -10,16 +10,18 @@ import ProductActions from "../../components/ProductActions";
 
 interface PendingProductsTableProps {
   pendingProducts: ProductRow[];
-  page: number;
+  initialPage: number;
   pageSize: number;
   hasMore: boolean;
 }
 
 const PendingProductsTable = ({
   pendingProducts,
-  page,
+  initialPage,
 }: PendingProductsTableProps) => {
   const [products, setProducts] = useState(pendingProducts);
+  const [page, setPage] = useState(initialPage);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const rows = products.map((p) => ({
     id: p.id,
@@ -92,16 +94,28 @@ const PendingProductsTable = ({
     setSelectedProductId(null);
   };
 
+  const handleChangePage = (_: unknown, newPage: number) => {
+    setPage(newPage + 1); // because your state is 1-based
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const newRowsPerPage = parseInt(event.target.value, 10);
+    setRowsPerPage(newRowsPerPage);
+    setPage(1);
+  };
+
   return (
     <div>
       <TableComponent
         columns={columns}
-        handleChangePage={() => {}}
-        handleChangeRowsPerPage={() => {}}
+        handleChangePage={handleChangePage}
+        handleChangeRowsPerPage={handleChangeRowsPerPage}
         page={page - 1}
         rowKey={"id"}
         rows={rows}
-        rowsPerPage={10}
+        rowsPerPage={rowsPerPage}
         actions={(row) => (
           <ProductActions
             row={row.raw}
