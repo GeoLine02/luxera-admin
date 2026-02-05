@@ -41,6 +41,11 @@ const routesData = [
         label: "Pending Products",
         href: "/products/pending-products",
       },
+      {
+        key: "rejected-products",
+        label: "Rejected Products",
+        href: "/products/rejected-products",
+      },
     ],
   },
   {
