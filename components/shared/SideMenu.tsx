@@ -49,6 +49,18 @@ const routesData = [
     ],
   },
   {
+    key: "shops",
+    label: "Shops",
+    href: "/shops",
+    children: [
+      {
+        key: "all-shops",
+        label: "All Shops",
+        href: "/shops/all-shops",
+      },
+    ],
+  },
+  {
     key: "users",
     label: "Users",
     href: "/users",
